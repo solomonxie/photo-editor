@@ -2,6 +2,8 @@ import Security
 import Foundation
 
 enum KeychainStore {
+    static let aiAPIKeyStorageKey = "ai.api.key"
+
     static func save(_ value: String, forKey key: String) {
         let data = Data(value.utf8)
         let query: [String: Any] = [
