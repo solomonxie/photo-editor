@@ -8,10 +8,8 @@ private enum AIProvider: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-private let apiKeyStorageKey = "ai.api.key"
-
 struct SettingsView: View {
-    @State private var apiKey: String = KeychainStore.load(forKey: apiKeyStorageKey) ?? ""
+    @State private var apiKey: String = KeychainStore.load(forKey: KeychainStore.aiAPIKeyStorageKey) ?? ""
     @State private var provider: AIProvider = .openAI
 
     var body: some View {
@@ -29,9 +27,9 @@ struct SettingsView: View {
                     SecureField("API Key", text: $apiKey)
                         .onChange(of: apiKey) { _, newValue in
                             if newValue.isEmpty {
-                                KeychainStore.delete(forKey: apiKeyStorageKey)
+                                KeychainStore.delete(forKey: KeychainStore.aiAPIKeyStorageKey)
                             } else {
-                                KeychainStore.save(newValue, forKey: apiKeyStorageKey)
+                                KeychainStore.save(newValue, forKey: KeychainStore.aiAPIKeyStorageKey)
                             }
                         }
                 } header: {
