@@ -1,29 +1,38 @@
 import SwiftUI
 
 private enum AITool: String, CaseIterable, Identifiable {
+    case removeBackground = "Remove Background"
     case enhance = "Enhance"
-    case backgroundRemove = "Background Remove"
-    case generateVariation = "Generate Variation"
+    case styleTransfer = "Style Transfer"
 
     var id: String { rawValue }
 
     var systemImage: String {
         switch self {
+        case .removeBackground: return "person.crop.rectangle.badge.xmark"
         case .enhance: return "wand.and.stars"
-        case .backgroundRemove: return "person.crop.rectangle.badge.xmark"
-        case .generateVariation: return "arrow.triangle.branch"
+        case .styleTransfer: return "paintpalette"
         }
     }
 }
 
 struct AIToolsView: View {
     @State private var activeTool: AITool?
+    @State private var showMissingKeyAlert = false
+
+    private var hasAPIKey: Bool {
+        !(KeychainStore.load(forKey: KeychainStore.aiAPIKeyStorageKey) ?? "").isEmpty
+    }
 
     var body: some View {
         NavigationStack {
             List(AITool.allCases) { tool in
                 Button {
-                    activeTool = tool
+                    if hasAPIKey {
+                        activeTool = tool
+                    } else {
+                        showMissingKeyAlert = true
+                    }
                 } label: {
                     Label(tool.rawValue, systemImage: tool.systemImage)
                 }
@@ -35,6 +44,11 @@ struct AIToolsView: View {
                     systemImage: "sparkles",
                     description: Text("Calls your configured AI provider using the API key from Settings. Not implemented yet.")
                 )
+            }
+            .alert("AI API Key Needed", isPresented: $showMissingKeyAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Add your own AI API key in the Settings tab to use AI tools.")
             }
         }
     }
