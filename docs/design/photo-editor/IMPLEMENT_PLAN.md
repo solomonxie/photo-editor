@@ -90,4 +90,4 @@ feature set is frozen.
 
 - [ ] T6.1 Performance pass (in-progress: iPhone 14 benchmark passes all targets; older devices not tested) — re-run T1.5 on all tools stacked. Instruments (Metal System Trace, Allocations) on the devices at hand, and fix regressions — see `PhotoEditorTests` — depends: T3.1–T3.6, T4.1–T4.5, T5.4
 - [ ] T6.2 Accessibility (in-progress: labels and adjustable sliders done; full VoiceOver walk pending) — VoiceOver labels on icon buttons, adjustable-action sliders, Dynamic Type in the chrome, Reduce Motion — see `PhotoEditor/Features` — depends: T3.1–T3.6, T4.1–T4.5, T5.4
-- [ ] T6.3 Privacy & store — `PrivacyInfo.xcprivacy`, privacy policy page, App Store privacy label (auth info), README update — see `PhotoEditor`, `README.md` — depends: T5.4
+- [x] T6.3 Privacy & store — `PrivacyInfo.xcprivacy`, privacy policy page, App Store privacy label (auth info), README update — see `PhotoEditor`, `README.md` — depends: T5.4
