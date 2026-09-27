@@ -24,4 +24,8 @@ cp Config/Local.xcconfig.example Config/Local.xcconfig   # add your Team ID
 xcodegen generate && open PhotoEditor.xcodeproj
 ```
 
+`make help` lists the rest: `make ios` (Release build onto the paired iPhone), `make test`
+(unit tests and the 48 MP benchmark on the device), `make release` (archive and upload).
+
 Design, UI and build plan: [`docs/design/photo-editor`](docs/design/photo-editor/).
+App Store release checklist: [`docs/release`](docs/release/).
