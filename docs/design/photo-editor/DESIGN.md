@@ -16,13 +16,16 @@ with watermarks and ads.
 - Non-destructive: any edit can be changed later, and the original stays untouched.
 - Exports at full resolution and keeps wide color (P3) / HDR when the source has it.
 - Generative AI runs only on the user's own API key. There's no backend.
+- Meitu-style touch-ups on-device: smooth skin, heal blemishes, red eye, face reshape
+  (slim, eyes, nose, chin, forehead), and body reshape (waist, hips, chest, legs,
+  shoulders, arms) guided by Vision landmarks, plus a manual push/grow/shrink brush.
 
 ## Non-goals (v1)
 
 - Android, iPad-specific layout, Mac.
 - Video, RAW / ProRAW development. (`CIRAWFilter` keeps adding them later cheap.)
 - Accounts, cloud sync, social feed, template marketplace.
-- Body reshape / liquify, makeup, face-shape tools.
+- Makeup, hair recolour, AI "beauty filters" that regenerate a face.
 - Replacing the original in Photos. v1 always saves a copy.
 - An in-app library browser. The system picker covers it.
 - Our own AI backend or paid credits.
@@ -58,10 +61,11 @@ with watermarks and ads.
 
 **AI**
 
-- On-device (Vision, Core Image auto-adjust, Metal): cutout / background removal,
-  auto enhance, skin smoothing. Free, private, offline, fast. **Chosen for everything it can do.**
-- Cloud, bring-your-own key: **only for generative work** (Magic Erase / inpaint,
-  Restyle by prompt).
+- On-device (Vision, Core Image, Metal): cutout / background removal, auto
+  enhance, skin smoothing, red eye, face/body reshape. Free, private, offline,
+  fast. **Chosen for everything it can do.**
+- Cloud, bring-your-own key: **only for generative work**. That means Magic Erase,
+  Fill (paint an area and describe it, e.g. "fuller hair") and Restyle.
   - Only vendors with image-edit APIs are listed: OpenAI, Google Gemini.
   - Anthropic is dropped from the vendor list: it has no image output, so a key could never work.
 - Bundled Core ML super-resolution: +30–60 MB app size. Deferred (see open questions).
@@ -77,7 +81,11 @@ with watermarks and ads.
 ## Decision summary
 
 - Swift 6, SwiftUI for the chrome, `MTKView` for the canvas.
-- One shared Metal-backed `CIContext`. Custom effects are `CIKernel`s written in Metal.
+- One shared Metal-backed `CIContext`.
+- Custom GPU work is a `CIImageProcessorKernel` running a Metal compute shader
+  compiled from source at runtime (the reshape warp).
+  - This avoids the offline Metal toolchain, which isn't part of a default Xcode install.
+- Skin smoothing uses Core Image's edge-preserving upsample instead of a custom bilateral kernel.
 - The edit document is an ordered list of ops. Rendering = building a
   `CIImage` graph from it (lazy, fused).
 - Screen-sized proxy while editing; full resolution only on export and thumbnails-on-demand.
@@ -100,6 +108,15 @@ with watermarks and ads.
     PNG and the prompt. Only when the user taps Run.
   - Results are cached in the project, and the user's vendor account pays.
 - **Network:** nothing else. No analytics, no crash SDK.
+
+## Measured (iPhone 14, synthetic 48 MP HEIC)
+
+| Metric | Result | Target |
+|---|---|---|
+| Open → preview | 89 ms | ≤ 500 ms |
+| Slider frame (median) | 4.5 ms | ≤ 8 ms |
+| Export 48 MP HEIC | 0.8 s | ≤ 3 s |
+| Footprint after export | ~250 MB | ≤ 800 MB |
 
 ## Risks / open questions
 
