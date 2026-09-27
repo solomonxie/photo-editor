@@ -2,9 +2,16 @@ import SwiftUI
 
 struct RetouchPanel: View {
     let model: EditorModel
-    @State private var mode: Mode = .smooth
+    @State private var mode: Mode = Self.initialMode
     @State private var faceCount: Int?
     @AppStorage(BrushOverlay.brushSizeKey) private var brushSize: Double = 28
+
+    private static var initialMode: Mode {
+        #if DEBUG
+        if let m = DebugLaunch.value("-mode").flatMap(Mode.init(rawValue:)) { return m }
+        #endif
+        return .smooth
+    }
 
     enum Mode: String, CaseIterable { case smooth, heal, redEye }
 

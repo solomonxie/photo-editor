@@ -72,8 +72,17 @@ nonisolated extension RenderPipeline {
         case .remove:
             background = CIImage.clear
         case .blur:
+            // Blur with the subject weighted out, so it doesn't bleed a halo into the background.
             let sigma = max(1, spec.blur / 100 * 0.02 * max(extent.width, extent.height))
-            background = img.clampedToExtent().applyingGaussianBlur(sigma: sigma)
+            let keep = mask.applyingFilter("CIColorInvert").applyingFilter("CIMaskToAlpha")
+            let weighted = img.applyingFilter("CIBlendWithAlphaMask", parameters: [
+                kCIInputBackgroundImageKey: CIImage.clear.cropped(to: extent),
+                kCIInputMaskImageKey: keep,
+            ])
+            background = weighted.clampedToExtent()
+                .applyingGaussianBlur(sigma: sigma)
+                .unpremultiplyingAlpha()
+                .settingAlphaOne(in: extent)
         case .color:
             let c = spec.color
             background = CIImage(color: CIColor(red: c.r, green: c.g, blue: c.b, alpha: c.a, colorSpace: RenderEngine.outputSpace)!)
