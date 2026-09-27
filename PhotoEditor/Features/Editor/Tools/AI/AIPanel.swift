@@ -18,7 +18,7 @@ final class NetworkStatus {
 
 struct AIPanel: View {
     let model: EditorModel
-    @State private var mode: Mode = .erase
+    @State private var mode: Mode = Self.initialMode
     @State private var prompt = ""
     @State private var running: Task<Void, Never>?
     @State private var startedAt: Date?
@@ -28,6 +28,13 @@ struct AIPanel: View {
     @State private var network = NetworkStatus.shared
     @AppStorage(BrushOverlay.brushSizeKey) private var brushSize: Double = 28
     @FocusState private var promptFocused: Bool
+
+    private static var initialMode: Mode {
+        #if DEBUG
+        if let m = DebugLaunch.value("-mode").flatMap(Mode.init(rawValue:)) { return m }
+        #endif
+        return .erase
+    }
 
     enum Mode: String, CaseIterable {
         case erase, fill, restyle

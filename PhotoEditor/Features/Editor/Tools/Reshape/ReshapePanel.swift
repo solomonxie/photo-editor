@@ -38,11 +38,18 @@ extension BodyShapeKey: Identifiable {
 
 struct ReshapePanel: View {
     let model: EditorModel
-    @State private var mode: Mode = .face
+    @State private var mode: Mode = Self.initialMode
     @State private var faceKey: FaceShapeKey? = .slim
     @State private var bodyKey: BodyShapeKey? = .waist
     @State private var counts: (faces: Int, bodies: Int)?
     @AppStorage(BrushOverlay.brushSizeKey) private var brushSize: Double = 28
+
+    private static var initialMode: Mode {
+        #if DEBUG
+        if let m = DebugLaunch.value("-mode").flatMap(Mode.init(rawValue:)) { return m }
+        #endif
+        return .face
+    }
 
     enum Mode: String, CaseIterable { case face, body, manual }
 
