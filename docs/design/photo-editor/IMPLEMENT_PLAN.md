@@ -83,6 +83,14 @@ the only networked, paid, optional part, and they reuse masks and layers.
 - [x] T5.3 AI clients — `OpenAIImageClient`, `GeminiImageClient` behind one protocol (edit with image + mask + prompt), downscale to vendor max, fallback runner, vendor errors kept verbatim, cancel — see `PhotoEditor/Services/AI` — depends: T5.1
 - [x] T5.4 AI tool — Magic Erase (brush mask), Fill (brush mask + prompt, e.g. "fuller hair") and Restyle (prompt + presets), no-key/offline/running/error states, result stored as a patch asset and composited full-res into the feathered mask — see `Engine/Ops/AIResult.swift`, `Features/Editor/Tools/AI`, `uiux/ai.md` — depends: T5.3, T3.4
 
+## Phase 5b: Save space
+
+Smaller exports and a library compressor. After the editor because the Save
+sheet changes reuse the exporter; independent of AI.
+
+- [x] T5b.1 Save sheet — HD size, High/Medium/Small quality, live file-size estimate from a real encode that Save reuses — see `Engine/Exporter.swift`, `Features/Editor/SaveSheet.swift`, `uiux/editor.md → Save sheet` — depends: T2.1
+- [x] T5b.2 Compress — PhotoKit read/write (`MediaLibrary`), HEIC re-encode keeping EXIF/GPS, HEVC video export presets, copies keep date/location/favourite, skip if <10% smaller, delete originals via system confirm — see `Services/Compress`, `Features/Compress`, `uiux/compress.md` — depends: T5b.1
+
 ## Phase 6: Ship readiness
 
 Verification against the targets and the App Store requirements, done once the

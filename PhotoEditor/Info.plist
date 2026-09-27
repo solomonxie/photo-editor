@@ -24,6 +24,8 @@
 	<false/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save your edited photos to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Compress reads only the photos and videos you choose, adds smaller copies, and deletes originals only when you confirm.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiresFullScreen</key>

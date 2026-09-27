@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var error: String?
     @State private var toDelete: Project?
     @State private var showSettings = false
+    @State private var showCompress = false
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 3)
 
@@ -30,6 +31,14 @@ struct HomeView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
+                    CompressView()
+                } label: {
+                    Image(systemName: "arrow.down.right.and.arrow.up.left")
+                }
+                .accessibilityLabel("Compress photos and videos")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
                     SettingsView()
                 } label: {
                     Image(systemName: "gearshape")
@@ -38,8 +47,12 @@ struct HomeView: View {
             }
         }
         .navigationDestination(isPresented: $showSettings) { SettingsView() }
+        .navigationDestination(isPresented: $showCompress) { CompressView() }
         #if DEBUG
-        .task { if DebugLaunch.has("-settings") { showSettings = true } }
+        .task {
+            if DebugLaunch.has("-settings") { showSettings = true }
+            if DebugLaunch.has("-compress") { showCompress = true }
+        }
         #endif
         .photosPicker(isPresented: $showPicker, selection: $pickerItem, matching: .images, preferredItemEncoding: .current)
         .onChange(of: pickerItem) { _, item in

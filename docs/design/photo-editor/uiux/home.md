@@ -3,7 +3,8 @@
 App root. Recent edits, and the single way to start a new one.
 
 ```
-                                                      ⚙   ← → Settings
+                                                 ⇲    ⚙   ← ⇲ → Compress
+                                                              ⚙ → Settings
 Photo Editor                                              ← large title
 RECENT                                          14 edits
 ┌──────────────────┬──────────────────┬──────────────────┐
@@ -22,7 +23,7 @@ RECENT                                          14 edits
          └──────────────────────────────────────┘    home indicator
 ```
 
-Reached from: launch · ✕ in Editor
+Reached from: launch · ✕ in Editor. Compress: [compress.md](compress.md).
 
 ## States
 

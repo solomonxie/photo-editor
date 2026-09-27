@@ -1,6 +1,6 @@
 # Privacy Policy — Photo Editor
 
-_Last updated: 2026-09-26_
+_Last updated: 2026-09-27_
 
 Photo Editor does not collect, transmit, or store your personal data on any server we control. We operate no server, and there is no account to create.
 
@@ -9,6 +9,8 @@ Copies of the photos you open, your edits, and your settings are kept in the app
 
 ## Photos access
 Photos are chosen with the system photo picker, so the app never sees the rest of your library. Saving asks for **add-only** access: the app can add a new photo to your library but cannot read it. Location data in a saved photo is kept or removed according to the setting in Settings → Export.
+
+The optional **Compress** tool asks for read/write access to your library, and only when you use it. It reads the photos and videos you choose, adds smaller copies (keeping their date and location), and deletes originals only when you tap Delete and confirm the iOS prompt. Nothing it reads leaves your device.
 
 ## On-device processing
 Filters, adjustments, crop, skin smoothing, blemish healing, red-eye correction, face and body reshaping, text, stickers and background cutout all run on your iPhone using Apple's Core Image, Metal and Vision frameworks. Face and body landmarks are detected only to place those edits, are held in memory while the photo is open, and are never stored or sent anywhere.

@@ -19,11 +19,14 @@ with watermarks and ads.
 - Meitu-style touch-ups on-device: smooth skin, heal blemishes, red eye, face reshape
   (slim, eyes, nose, chin, forehead), and body reshape (waist, hips, chest, legs,
   shoulders, arms) guided by Vision landmarks, plus a manual push/grow/shrink brush.
+- Save space: export at HD/2K/4K with a quality level and a live file-size estimate,
+  and Compress library photos/videos into smaller HEIC/HEVC copies. Originals are
+  deleted only on explicit confirm. This is the one feature that needs full Photos access.
 
 ## Non-goals (v1)
 
 - Android, iPad-specific layout, Mac.
-- Video, RAW / ProRAW development. (`CIRAWFilter` keeps adding them later cheap.)
+- Video editing, RAW / ProRAW development. (Video is only re-encoded by Compress.) (`CIRAWFilter` keeps adding them later cheap.)
 - Accounts, cloud sync, social feed, template marketplace.
 - Makeup, hair recolour, AI "beauty filters" that regenerate a face.
 - Replacing the original in Photos. v1 always saves a copy.
