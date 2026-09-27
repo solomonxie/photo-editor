@@ -46,6 +46,21 @@ Paint an area, then describe what goes there. This is how "add hair" works.
  via Google Gemini · your account is billed  [[ Restyle ]]
 ```
 
+## Expand (v1.1)
+
+```
+ [ 1.25× | 1.5× | 1:1 | 4:5 | 9:16 ]                  [[ Expand ]]
+```
+Sends the photo on a larger canvas with the new border as the mask. The result
+opens as a new edit (the source frame changes size); the current edit is kept.
+
+## Restore (v1.1)
+
+```
+ [ Restore ]  [ Restore + colourise ]                 [[ Run ]]
+```
+Old-photo repair (scratches, dust, blur, fading) as a whole-frame patch.
+
 ## States
 
 ```
