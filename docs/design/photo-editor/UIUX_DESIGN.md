@@ -28,8 +28,8 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
 |---|---|---|
 | Home | page (root) | [uiux/home.md](uiux/home.md) |
 | Editor | full-screen page, dark | [uiux/editor.md](uiux/editor.md) |
-| Tool panels (Adjust, Filters, Crop, Retouch, Text, Stickers, Cutout) | in-place panel above the tool bar | [uiux/tools.md](uiux/tools.md) |
-| AI (Magic Erase, Restyle) | in-place panel + run state | [uiux/ai.md](uiux/ai.md) |
+| Tool panels (Adjust, Filters, Crop, Retouch, Reshape, Text, Stickers, Cutout) | in-place panel above the tool bar | [uiux/tools.md](uiux/tools.md) |
+| AI (Magic Erase, Fill, Restyle) | in-place panel + run state | [uiux/ai.md](uiux/ai.md) |
 | Layers | half sheet | [uiux/editor.md](uiux/editor.md#layers-sheet) |
 | Save | half sheet | [uiux/editor.md](uiux/editor.md#save-sheet) |
 | Settings | pushed page | [uiux/settings.md](uiux/settings.md) |
@@ -72,7 +72,7 @@ Leave
 - **Autosave, never ask.** Every op is persisted the moment it's made, and undo is the safety net.
 - **The photo is the UI.** Chrome is dark and minimal. Panels never cover the canvas: the canvas shrinks.
 - **Hold to compare.** Press and hold the canvas (or the Compare button) to show the original.
-- **Degrade, never error** (`byo-ai-keys.md`). With no key, only the two generative
+- **Degrade, never error** (`byo-ai-keys.md`). With no key, only the three generative
   tools ask for one. Everything else works.
 - **Explanations behind ⓘ** (`mobile.md`) in Settings.
 

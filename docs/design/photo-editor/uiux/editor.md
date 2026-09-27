@@ -19,8 +19,8 @@ autosaves on every op.
  ├───────────────────────────────●─────────────────────┤     (tools.md)
  ( Auto )  EXPOSURE  Brilliance  Contrast  Highlights  ›
 ────────────────────────────────────────────────────────
- ADJUST  Filters  Crop  Retouch  Text  Stickers  Cutout  AI  ← tool bar;
-                                                               scrolls horizontally
+ ADJUST Filters Crop Retouch Reshape Text Stickers Cutout AI ← tool bar;
+                                                              scrolls horizontally
 ```
 
 - `↶ ↷` = SF `arrow.uturn.backward` / `.forward`. They're disabled (`·`) at the ends of the history.
@@ -50,7 +50,8 @@ loading     canvas: blurred low-res preview → sharp     ← embedded HEIC thum
                                                           first, proxy next
 editing     as the default mock
 comparing   top-left pill: "Original"                    ← while held
-exporting   Save sheet shows [██████░░░░] 62%
+exporting   Save sheet shows ⟳ Exporting…  ( Cancel )     ← CI gives no progress;
+                                                          no fake bar
 error       ⌐ Something went wrong rendering. Undo the last change. ¬
 low memory  ⌐ Closed other layers' previews to free memory ¬   ← rare; iOS warning
 ```
@@ -103,7 +104,7 @@ one layer   only "Photo" row + hint "Add text, stickers or a cutout to get layer
 ```
 
 ```
-exporting  [██████████░░░░░░] 62%          ( Cancel )
+exporting  ⟳ Exporting…                      ( Cancel )
 done       sheet closes → ⌐ Saved to Photos ¬
 denied     ┌───────────────────────────────────────────┐
            │  Allow adding to Photos                   │

@@ -65,15 +65,37 @@ The canvas switches to crop mode and the photo shrinks to fit the handles.
 ```
  Smooth skin                                           40
  ├──────────────────●──────────────────────────────────┤
- [ SMOOTH SKIN | Heal ]
+ [ SMOOTH SKIN | Heal | Red eye ]
 ```
 
 ```
 smooth skin, faces found    applies to face/skin mask; slider 0–100
 smooth skin, no face        slider ·   "No faces found in this photo."
-heal                        "Paint over a spot to remove it."
+heal                        "Tap a blemish or paint over a spot."
                             Brush size ├────●─────┤
                             painting shows a red trail; lift ⇒ healed
+red eye                     Fix red eyes                              ─●
+```
+
+## Reshape
+
+On-device warp guided by Vision face and body landmarks.
+
+```
+ Waist · + slimmer                                    +40   ← caption says what + does
+ ├──────────────────────────────────●──────────────────┤
+ WAIST•  Hips  Chest  Legs  Shoulders  Arms              ›
+ [ Face | BODY | Manual ]
+```
+
+```
+face       Slim Face · Chin · Eyes · Nose · Forehead      (bipolar sliders)
+body       Waist · Hips · Chest · Legs · Shoulders · Arms
+manual     [ PUSH | Grow | Shrink ]  ( Clear )
+           Brush ├────●─────┤         drag on the photo; ring = brush
+no face    "No faces found. Try Manual to reshape by hand."
+no body    "No full body found. Try Manual to reshape by hand."
+           → opens on Body when there's a body but no face
 ```
 
 ## Text
@@ -141,7 +163,10 @@ color          swatches ● ● ● ● ⊕
 |---|---|
 | `adjust.auto` | Auto |
 | `retouch.noface` | No faces found in this photo. |
-| `retouch.heal.hint` | Paint over a spot to remove it. |
+| `retouch.heal.hint` | Tap a blemish or paint over a spot. |
+| `retouch.redeye` | Fix red eyes |
+| `reshape.noface` | No faces found. Try Manual to reshape by hand. |
+| `reshape.nobody` | No full body found. Try Manual to reshape by hand. |
 | `text.placeholder` | Your text |
 | `stickers.search` | Search emoji |
 | `cutout.finding` | Finding subjects… |

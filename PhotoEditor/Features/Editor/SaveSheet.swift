@@ -33,7 +33,7 @@ struct SaveSheet: View {
                         Segmented(options: ExportSize.allCases, selection: $size) { $0.label }
                             .frame(width: 210)
                         let px = Exporter.outputSize(model.document, size: size)
-                        Text("\(Int(px.width))×\(Int(px.height))")
+                        Text(verbatim: "\(Int(px.width))×\(Int(px.height))")
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary)
                     }
