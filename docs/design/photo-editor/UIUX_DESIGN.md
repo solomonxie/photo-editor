@@ -33,6 +33,9 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
 | AI (Magic Erase, Fill, Restyle) | in-place panel + run state | [uiux/ai.md](uiux/ai.md) |
 | Layers | half sheet | [uiux/editor.md](uiux/editor.md#layers-sheet) |
 | Save | half sheet | [uiux/editor.md](uiux/editor.md#save-sheet) |
+| Beauty, Makeup, Reshape (v1.1) | in-place panels | [uiux/beauty.md](uiux/beauty.md) |
+| Draw, Mosaic, Background, Frame, ID Photo | in-place panels | [uiux/creative.md](uiux/creative.md) |
+| Home actions, Collage, Batch | page / pushed page | [uiux/collage-batch.md](uiux/collage-batch.md) |
 | Settings | pushed page | [uiux/settings.md](uiux/settings.md) |
 | Compress | pushed page | [uiux/compress.md](uiux/compress.md) |
 | Add AI Key | half sheet | [uiux/settings.md](uiux/settings.md#add-ai-key-sheet) |

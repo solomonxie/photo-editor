@@ -91,6 +91,24 @@ sheet changes reuse the exporter; independent of AI.
 - [x] T5b.1 Save sheet — HD size, High/Medium/Small quality, live file-size estimate from a real encode that Save reuses — see `Engine/Exporter.swift`, `Features/Editor/SaveSheet.swift`, `uiux/editor.md → Save sheet` — depends: T2.1
 - [x] T5b.2 Compress — PhotoKit read/write (`MediaLibrary`), HEIC re-encode keeping EXIF/GPS, HEVC video export presets, copies keep date/location/favourite, skip if <10% smaller, delete originals via system confirm — see `Services/Compress`, `Features/Compress`, `uiux/compress.md` — depends: T5b.1
 
+## Phase 7: Meitu parity (v1.1)
+
+Everything a Meitu user reaches for after smoothing and slimming. Face ops first
+(they share the landmark masks), then canvas-level tools, then the multi-photo
+features, which reuse the exporter and pipeline unchanged.
+
+- [ ] T7.1 Face masks + Beauty — extend `FaceAnalysis` (lips, brows, eye polygons), mask painter; Retouch → Beauty with whiten, even tone, de-shine, dark circles, bright eyes, teeth, Auto looks — see `Engine/Ops/Beauty.swift`, `uiux/beauty.md` — depends: T4.2
+- [ ] T7.2 Makeup + hair — lips, blush, brows, liner, contour, looks; hair = person mask ∩ head − face — see `Engine/Ops/Makeup.swift`, `Features/Editor/Tools/Makeup` — depends: T7.1
+- [ ] T7.3 Reshape head / neck — see `Engine/Ops/Reshape.swift` — depends: T4.5
+- [ ] T7.4 Mosaic + Draw — mosaic strokes in the doc; drawing as a layer kind — see `Engine/Ops/Mosaic.swift`, `Engine/Ops/Layers.swift`, `uiux/creative.md` — depends: T3.4
+- [ ] T7.5 Background photo / gradient — see `Engine/Ops/Cutout.swift` — depends: T4.1
+- [ ] T7.6 Frame — framed canvas size, viewport content rect so overlays stay on the photo, exporter size — see `Engine/Ops/Frame.swift`, `Canvas/Viewport.swift` — depends: T7.4
+- [ ] T7.7 ID photo — presets write cutout + crop from the face box — see `Features/Editor/Tools/IDPhoto` — depends: T7.5
+- [ ] T7.8 Adjust denoise/clarity; AI Expand (new edit) and Restore — see `Services/AI`, `uiux/ai.md` — depends: T5.4
+- [ ] T7.9 Collage — layouts, per-cell pan, save or edit — see `Features/Collage`, `uiux/collage-batch.md` — depends: T2.1
+- [ ] T7.10 Batch apply — copy global edits onto picked photos, export each — see `Features/Editor/BatchSheet.swift` — depends: T7.1–T7.6
+- [ ] T7.11 Home actions row (Edit, Beauty, Collage, ID) — see `Features/Home` — depends: T7.7, T7.9
+
 ## Phase 6: Ship readiness
 
 Verification against the targets and the App Store requirements, done once the
