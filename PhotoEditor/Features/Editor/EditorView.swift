@@ -42,6 +42,14 @@ struct EditorView: View {
         .preferredColorScheme(.dark)
         #if DEBUG
         .task {
+            if let name = DebugLaunch.value("-exportTo") {
+                let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                if let data = try? await Exporter.export(document: model.document, session: model.session, format: .jpeg,
+                                                         size: .full, keepLocation: false) {
+                    try? data.write(to: docs.appendingPathComponent(name))
+                    model.showToast("Exported \(name)")
+                }
+            }
             switch DebugLaunch.sheet {
             case "save": showSave = true
             case "layers": showLayers = true
