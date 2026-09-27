@@ -25,14 +25,19 @@ struct FiltersPanel: View {
                 .padding(.horizontal, 20)
                 .transition(.opacity)
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    tile(id: Self.original, name: "Original")
-                    ForEach(FilterCatalog.presets) { p in
-                        tile(id: p.id, name: p.name)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        tile(id: Self.original, name: "Original").id(Self.original)
+                        ForEach(FilterCatalog.presets) { p in
+                            tile(id: p.id, name: p.name).id(p.id)
+                        }
                     }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
+                .onAppear {
+                    if let id = model.document.filter?.id { proxy.scrollTo(id, anchor: .center) }
+                }
             }
         }
         .task { await renderThumbs() }
