@@ -17,13 +17,14 @@ nonisolated enum ExportFormat: String, CaseIterable, Codable, Sendable {
 }
 
 nonisolated enum ExportSize: String, CaseIterable, Sendable {
-    case full, uhd, qhd
+    case full, uhd, qhd, hd
 
     var label: String {
         switch self {
         case .full: "Full"
         case .uhd: "4K"
         case .qhd: "2K"
+        case .hd: "HD"
         }
     }
 
@@ -32,6 +33,20 @@ nonisolated enum ExportSize: String, CaseIterable, Sendable {
         case .full: nil
         case .uhd: 3840
         case .qhd: 2048
+        case .hd: 1280
+        }
+    }
+}
+
+nonisolated enum ExportQuality: String, CaseIterable, Sendable {
+    case high, medium, small
+
+    var label: String { rawValue.capitalized }
+    var compression: CGFloat {
+        switch self {
+        case .high: 0.92
+        case .medium: 0.75
+        case .small: 0.55
         }
     }
 }
@@ -61,7 +76,7 @@ nonisolated enum Exporter {
     /// Renders the document at full resolution and encodes it. Runs off the main actor.
     @concurrent
     static func export(document: EditDocument, session: RenderSession, format: ExportFormat,
-                       size: ExportSize, keepLocation: Bool) async throws -> Data {
+                       size: ExportSize, quality: ExportQuality = .high, keepLocation: Bool) async throws -> Data {
         let state = RenderEngine.signposter.beginInterval("export")
         defer { RenderEngine.signposter.endInterval("export", state) }
 
@@ -89,7 +104,7 @@ nonisolated enum Exporter {
         props[kCGImagePropertyPixelHeight] = nil
         if !keepLocation { props[kCGImagePropertyGPSDictionary] = nil }
         if format != .png {
-            props[kCGImageDestinationLossyCompressionQuality] = 0.92
+            props[kCGImageDestinationLossyCompressionQuality] = quality.compression
         }
         var tiff = props[kCGImagePropertyTIFFDictionary] as? [CFString: Any] ?? [:]
         tiff[kCGImagePropertyTIFFOrientation] = 1
