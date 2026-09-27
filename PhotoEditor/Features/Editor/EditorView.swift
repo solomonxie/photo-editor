@@ -124,8 +124,9 @@ struct EditorView: View {
         }
         .font(.system(size: 17, weight: .medium))
         .foregroundStyle(.primary)
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 16)
         .frame(height: 48)
+        .padding(.top, 8)
     }
 
     // MARK: canvas
@@ -209,8 +210,9 @@ struct EditorView: View {
                     .accessibilityAddTraits(active ? .isSelected : [])
                 }
             }
-            .padding(.horizontal, 6)
+            .padding(.horizontal, 12)
         }
-        .padding(.vertical, 4)
+        .padding(.top, 6)
+        .padding(.bottom, 12)
     }
 }

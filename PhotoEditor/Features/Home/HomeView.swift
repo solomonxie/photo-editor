@@ -11,7 +11,7 @@ struct HomeView: View {
     @State private var toDelete: Project?
     @State private var showSettings = false
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 3), count: 3)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 3)
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -23,7 +23,7 @@ struct HomeView: View {
             if !store.projects.isEmpty {
                 openButton
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 16)
             }
         }
         .navigationTitle("Photo Editor")
@@ -97,7 +97,7 @@ struct HomeView: View {
             .padding(.horizontal, 16)
             .padding(.top, 4)
 
-            LazyVGrid(columns: columns, spacing: 3) {
+            LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(store.projects) { project in
                     Button {
                         open(project)
@@ -105,7 +105,7 @@ struct HomeView: View {
                         Color.clear
                             .aspectRatio(1, contentMode: .fit)
                             .overlay { ProjectThumbnail(project: project) }
-                            .clipped()
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -117,6 +117,7 @@ struct HomeView: View {
                     .accessibilityLabel("Edit from \(project.modified.formatted(date: .abbreviated, time: .shortened))")
                 }
             }
+            .padding(.horizontal, 16)
             .padding(.bottom, 100)
         }
     }
