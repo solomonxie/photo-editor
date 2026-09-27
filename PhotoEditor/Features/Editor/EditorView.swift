@@ -37,7 +37,7 @@ struct EditorView: View {
         }
         .sheet(isPresented: $showSave) {
             SaveSheet(model: model)
-                .presentationDetents([.height(330)])
+                .presentationDetents([.height(430)])
                 .presentationDragIndicator(.visible)
         }
         .preferredColorScheme(.dark)

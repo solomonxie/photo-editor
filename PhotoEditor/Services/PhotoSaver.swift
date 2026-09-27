@@ -35,4 +35,5 @@ enum PhotoSaver {
 enum AppSettings {
     static let exportFormatKey = "export.format"
     static let keepLocationKey = "export.keepLocation"
+    static let exportQualityKey = "export.quality"
 }
