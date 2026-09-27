@@ -1,0 +1,2 @@
+// Copy to Local.xcconfig (gitignored) and fill in your own Apple Developer team.
+DEVELOPMENT_TEAM =
