@@ -12,7 +12,7 @@ enum EditorTool: String, CaseIterable, Identifiable {
         case .adjust: "Adjust"
         case .filters: "Filters"
         case .crop: "Crop"
-        case .retouch: "Retouch"
+        case .retouch: "Beauty"
         case .reshape: "Reshape"
         case .text: "Text"
         case .stickers: "Stickers"
