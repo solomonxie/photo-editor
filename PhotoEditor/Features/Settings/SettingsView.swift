@@ -59,6 +59,9 @@ struct SettingsView: View {
             Text("Originals in Photos aren't affected. This can't be undone.")
         }
         .task { refreshSize() }
+        #if DEBUG
+        .task { if DebugLaunch.has("-addkey") { showAddKey = true } }
+        #endif
     }
 
     private var aiSection: some View {
@@ -131,7 +134,7 @@ struct SettingsView: View {
                 .disabled(keys.keys.count < 2)
             }
         } footer: {
-            Text("Only for Magic Erase and Restyle.")
+            Text("Only for AI Magic Erase, Fill and Restyle. Everything else runs on this iPhone.")
         }
     }
 
