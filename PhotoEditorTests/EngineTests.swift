@@ -215,3 +215,36 @@ final class AIErrorTests: XCTestCase {
         XCTAssertFalse(AIError(vendor: .openAI, status: 400, code: "invalid_value", message: "").shouldFallback)
     }
 }
+
+final class MediaCompressorTests: XCTestCase {
+    private func noisyJPEG(width: Int, height: Int) throws -> Data {
+        let noise = CIFilter(name: "CIRandomGenerator")!.outputImage!.cropped(to: CGRect(x: 0, y: 0, width: width, height: height))
+        let cg = try XCTUnwrap(CIContext().createCGImage(noise, from: noise.extent))
+        let out = NSMutableData()
+        let dest = try XCTUnwrap(CGImageDestinationCreateWithData(out, "public.jpeg" as CFString, 1, nil))
+        let exif: [CFString: Any] = [kCGImagePropertyExifDateTimeOriginal: "2024:05:01 10:00:00"]
+        CGImageDestinationAddImage(dest, cg, [kCGImagePropertyExifDictionary: exif, kCGImageDestinationLossyCompressionQuality: 0.95] as CFDictionary)
+        XCTAssertTrue(CGImageDestinationFinalize(dest))
+        return out as Data
+    }
+
+    func testShrinksAndKeepsMetadata() throws {
+        let data = try noisyJPEG(width: 3000, height: 2000)
+        let out = try MediaCompressor.photo(data, maxEdge: ExportSize.hd.maxLongEdge, quality: .medium)
+        XCTAssertLessThan(out.count, data.count / 2)
+        let src = try XCTUnwrap(CGImageSourceCreateWithData(out as CFData, nil))
+        let props = try XCTUnwrap(CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any])
+        XCTAssertEqual(props[kCGImagePropertyPixelWidth] as? Int, 1280)
+        XCTAssertEqual(props[kCGImagePropertyPixelHeight] as? Int, 853)
+        let exif = props[kCGImagePropertyExifDictionary] as? [CFString: Any]
+        XCTAssertEqual(exif?[kCGImagePropertyExifDateTimeOriginal] as? String, "2024:05:01 10:00:00")
+    }
+
+    func testNeverUpscales() throws {
+        let data = try noisyJPEG(width: 800, height: 600)
+        let out = try MediaCompressor.photo(data, maxEdge: ExportSize.uhd.maxLongEdge, quality: .high)
+        let src = try XCTUnwrap(CGImageSourceCreateWithData(out as CFData, nil))
+        let props = try XCTUnwrap(CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any])
+        XCTAssertEqual(props[kCGImagePropertyPixelWidth] as? Int, 800)
+    }
+}

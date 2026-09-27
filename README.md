@@ -15,7 +15,9 @@ Everything except generative AI runs on the device.
 - **Cutout:** remove, blur or recolour the background, or lift the subject into a sticker.
 - **AI, on your own key (OpenAI or Gemini):** Magic Erase, Fill (e.g. "fuller hair")
   and Restyle. The key stays in this iPhone's Keychain, and your vendor bills you.
-- **Non-destructive:** every edit stays adjustable, and saving always adds a new photo.
+- **Non-destructive:** every saved edit stays adjustable, and saving always adds a new photo.
+- **Save space:** export at HD–4K with a quality level and a live size estimate, and
+  Compress library photos and videos into smaller HEIC/HEVC copies.
 
 ## Setup
 
