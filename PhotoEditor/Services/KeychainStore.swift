@@ -1,40 +1,50 @@
-import Security
 import Foundation
+import Security
 
-enum KeychainStore {
-    static let aiAPIKeyStorageKey = "ai.api.key"
+nonisolated enum KeychainStore {
+    static let service = "com.example.photoeditor"
+    /// Pre-multi-key single key, migrated by AIKeyStore.
+    static let legacyAIKey = "ai.api.key"
 
     static func save(_ value: String, forKey key: String) {
-        let data = Data(value.utf8)
-        let query: [String: Any] = [
+        delete(forKey: key)
+        let attributes: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
             kSecAttrAccount as String: key,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecValueData as String: Data(value.utf8),
         ]
-        SecItemDelete(query as CFDictionary)
-
-        var attributes = query
-        attributes[kSecValueData as String] = data
         SecItemAdd(attributes as CFDictionary, nil)
     }
 
     static func load(forKey key: String) -> String? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne,
-        ]
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess, let data = result as? Data else { return nil }
-        return String(data: data, encoding: .utf8)
+        for query in [scoped(key), unscoped(key)] {
+            var q = query
+            q[kSecReturnData as String] = true
+            q[kSecMatchLimit as String] = kSecMatchLimitOne
+            var result: AnyObject?
+            if SecItemCopyMatching(q as CFDictionary, &result) == errSecSuccess, let data = result as? Data {
+                return String(data: data, encoding: .utf8)
+            }
+        }
+        return nil
     }
 
     static func delete(forKey key: String) {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-        ]
-        SecItemDelete(query as CFDictionary)
+        SecItemDelete(scoped(key) as CFDictionary)
+        SecItemDelete(unscoped(key) as CFDictionary)
+    }
+
+    private static func scoped(_ key: String) -> [String: Any] {
+        [kSecClass as String: kSecClassGenericPassword,
+         kSecAttrService as String: service,
+         kSecAttrAccount as String: key]
+    }
+
+    /// Items written by the scaffold had no service attribute.
+    private static func unscoped(_ key: String) -> [String: Any] {
+        [kSecClass as String: kSecClassGenericPassword,
+         kSecAttrAccount as String: key]
     }
 }
