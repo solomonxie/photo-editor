@@ -19,6 +19,11 @@ with watermarks and ads.
 - Meitu-style touch-ups on-device: smooth skin, heal blemishes, red eye, face reshape
   (slim, eyes, nose, chin, forehead), and body reshape (waist, hips, chest, legs,
   shoulders, arms) guided by Vision landmarks, plus a manual push/grow/shrink brush.
+- Meitu parity (v1.1), all on-device unless noted: one-tap Auto Beauty looks; skin
+  whiten / even tone / de-shine; dark circles, bright eyes, teeth whitening; makeup
+  (lips, blush, brows, liner, contour, full looks); hair colour; small head / long
+  neck; mosaic + blur brush; doodle pen; frames; background photo / gradient; ID
+  photo; collage; batch apply. AI Expand and AI Restore on the user's own key.
 - Save space: export at HD/2K/4K with a quality level and a live file-size estimate,
   and Compress library photos/videos into smaller HEIC/HEVC copies. Originals are
   deleted only on explicit confirm. This is the one feature that needs full Photos access.
@@ -28,7 +33,7 @@ with watermarks and ads.
 - Android, iPad-specific layout, Mac.
 - Video editing, RAW / ProRAW development. (Video is only re-encoded by Compress.) (`CIRAWFilter` keeps adding them later cheap.)
 - Accounts, cloud sync, social feed, template marketplace.
-- Makeup, hair recolour, AI "beauty filters" that regenerate a face.
+- AI "beauty filters" that regenerate a face. (Makeup and hair colour are on-device tints, v1.1.)
 - Replacing the original in Photos. v1 always saves a copy.
 - An in-app library browser. The system picker covers it.
 - Our own AI backend or paid credits.
