@@ -50,7 +50,7 @@ struct AddKeySheet: View {
                         } else if let hint = vendor.hint(for: key) {
                             Label(hint, systemImage: "info.circle")
                         }
-                        Button("Don't have a \(vendor.shortName) key?  Get one →") {
+                        Button("Need a key? Get one from \(vendor.shortName) →") {
                             openURL(vendor.consoleURL)
                         }
                         .font(.footnote)
