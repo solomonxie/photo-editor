@@ -22,13 +22,14 @@ nonisolated struct AIError: LocalizedError, Sendable {
     /// Retryable on another key: auth, quota, rate limit, server or network trouble.
     var shouldFallback: Bool {
         guard let status else { return true }
-        return status == 401 || status == 403 || status == 429 || status >= 500
+        return isAuth || status == 429 || status >= 500
     }
 
-    var isAuth: Bool { status == 401 || status == 403 }
+    /// Gemini reports a bad key as 400 with reason API_KEY_INVALID.
+    var isAuth: Bool { status == 401 || status == 403 || code == "API_KEY_INVALID" }
 
     var errorDescription: String? {
-        if isAuth { return "\(vendor.shortName) rejected the key (\(status!))." }
+        if isAuth { return "\(vendor.shortName) rejected the key (\(code ?? String(status ?? 0)))." }
         if status == 429 { return "\(vendor.shortName) rate limited this key (429)." }
         if status == nil { return "Couldn't reach \(vendor.shortName)." }
         return "\(vendor.shortName) said: \(code ?? message) (\(status!))"
@@ -74,11 +75,13 @@ nonisolated enum HTTP {
         return data
     }
 
-    /// Both vendors use {"error": {"code"/"status", "message"}}.
-    private static func parseError(_ data: Data) -> (String?, String?) {
+    /// OpenAI: {"error": {"code": "invalid_api_key", …}}.
+    /// Gemini: {"error": {"code": 400, "status": "INVALID_ARGUMENT", "details": [{"reason": "API_KEY_INVALID"}]}}.
+    static func parseError(_ data: Data) -> (String?, String?) {
         guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let err = obj["error"] as? [String: Any] else { return (nil, nil) }
-        let code = (err["code"] as? String) ?? (err["status"] as? String) ?? (err["type"] as? String)
+        let reason = (err["details"] as? [[String: Any]])?.compactMap { $0["reason"] as? String }.first
+        let code = reason ?? (err["code"] as? String) ?? (err["status"] as? String) ?? (err["type"] as? String)
         return (code, err["message"] as? String)
     }
 }
