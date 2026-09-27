@@ -43,7 +43,7 @@ screen depends on these, and 48 MP memory risk has to be settled here, not later
 The first end-to-end loop: pick → edit → save → resume. Tools plug into this
 frame, so it lands before any of them.
 
-- [x] T2.1 Editor screen — `EditorModel` (document ↔ engine ↔ canvas, autosave, undo/redo), top bar, tool bar, `ToolPanel` host, canvas resize on panel open/close, render-error toast — see `PhotoEditor/Features/Editor`, `uiux/editor.md` — depends: T1.3, T1.4
+- [x] T2.1 Editor screen — `EditorModel` (document ↔ engine ↔ canvas, save-on-export + discard prompt, undo/redo), top bar, tool bar, `ToolPanel` host, canvas resize on panel open/close, render-error toast — see `PhotoEditor/Features/Editor`, `uiux/editor.md` — depends: T1.3, T1.4
 - [x] T2.2 Shared components — `ToolPanel`, `ValueSlider` (haptic at 0, double-tap reset, one drag = one undo step), `ChipRow`, `ThumbStrip`, `Toast` — see `PhotoEditor/Features/Components`, `uiux/components.md` — depends: T0.2
 - [x] T2.3 Home — recents grid (lazy thumbnails), Open Photo → PhotosPicker → project, empty/opening/error states, long-press menu, delete alert — see `PhotoEditor/Features/Home`, `uiux/home.md` — depends: T1.4, T2.2
 - [x] T2.4 Save & export — Save sheet (format/size, auto-PNG on alpha), progress + cancel, `PHPhotoLibrary` add-only save, denied alert → Settings, share sheet, strip location unless kept — see `PhotoEditor/Services/PhotoSaver.swift`, `uiux/editor.md → Save sheet` — depends: T1.2, T2.2

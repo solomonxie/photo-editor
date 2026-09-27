@@ -23,6 +23,7 @@ final class ProjectStore {
     static let shared = ProjectStore()
 
     private(set) var projects: [Project] = []
+    private var neverSaved: Set<UUID> = []
     /// Bumps when a thumbnail changes so grids reload it.
     private(set) var thumbnailVersion: [UUID: Int] = [:]
 
@@ -81,7 +82,12 @@ final class ProjectStore {
             try ProjectStore.makeProject(from: data, in: root)
         }.value
         projects.insert(project, at: 0)
+        neverSaved.insert(project.id)
         return project
+    }
+
+    func discardIfUnsaved(_ project: Project) {
+        if neverSaved.remove(project.id) != nil { delete(project) }
     }
 
     // MARK: document IO
@@ -97,6 +103,7 @@ final class ProjectStore {
     }
 
     func didSave(_ project: Project) {
+        neverSaved.remove(project.id)
         guard let i = projects.firstIndex(where: { $0.id == project.id }) else { return }
         projects[i].modified = Date()
         let p = projects.remove(at: i)
