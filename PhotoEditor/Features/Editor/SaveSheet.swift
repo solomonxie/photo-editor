@@ -5,6 +5,7 @@ struct SaveSheet: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppSettings.exportFormatKey) private var defaultFormat: ExportFormat = .heic
     @AppStorage(AppSettings.keepLocationKey) private var keepLocation = true
+    @AppStorage(AppSettings.exportQualityKey) private var quality: ExportQuality = .high
 
     @State private var format: ExportFormat = .heic
     @State private var size: ExportSize = .full
@@ -13,6 +14,15 @@ struct SaveSheet: View {
     @State private var showDenied = false
     @State private var errorMessage: String?
     @State private var shareURL: URL?
+    @State private var prepared: (settings: Settings, data: Data)?
+
+    private struct Settings: Equatable {
+        var format: ExportFormat, size: ExportSize, quality: ExportQuality, keepLocation: Bool
+    }
+
+    private var settings: Settings {
+        Settings(format: format, size: size, quality: quality, keepLocation: keepLocation)
+    }
 
     enum Action { case save, share }
 
@@ -25,22 +35,40 @@ struct SaveSheet: View {
             VStack(spacing: 0) {
                 row("Format") {
                     Segmented(options: ExportFormat.allCases, selection: $format) { $0.label }
-                        .frame(width: 210)
+                        .frame(width: 230)
                 }
                 Divider().padding(.leading, 16)
                 row("Size") {
                     VStack(alignment: .trailing, spacing: 4) {
                         Segmented(options: ExportSize.allCases, selection: $size) { $0.label }
-                            .frame(width: 210)
+                            .frame(width: 230)
                         let px = Exporter.outputSize(model.document, size: size)
                         Text(verbatim: "\(Int(px.width))×\(Int(px.height))")
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary)
                     }
                 }
+                if format != .png {
+                    Divider().padding(.leading, 16)
+                    row("Quality") {
+                        Segmented(options: ExportQuality.allCases, selection: $quality) { $0.label }
+                            .frame(width: 230)
+                    }
+                }
+                Divider().padding(.leading, 16)
+                row("File size") {
+                    if let prepared, prepared.settings == settings {
+                        Text(ByteCountFormatter.string(fromByteCount: Int64(prepared.data.count), countStyle: .file))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ProgressView().controlSize(.small)
+                    }
+                }
             }
             .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
             .padding(.horizontal)
+            .task(id: settings) { await estimate() }
 
             if let errorMessage {
                 Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
@@ -107,10 +135,17 @@ struct SaveSheet: View {
         working = action
         let doc = model.document
         let session = model.session
-        let format = format, size = size, keep = keepLocation
+        let s = settings
+        let ready = prepared?.settings == s ? prepared?.data : nil
         task = Task {
             do {
-                let data = try await Exporter.export(document: doc, session: session, format: format, size: size, keepLocation: keep)
+                let data: Data
+                if let ready {
+                    data = ready
+                } else {
+                    data = try await Exporter.export(document: doc, session: session, format: s.format, size: s.size,
+                                                     quality: s.quality, keepLocation: s.keepLocation)
+                }
                 try Task.checkCancellation()
                 switch action {
                 case .save:
@@ -121,7 +156,7 @@ struct SaveSheet: View {
                     model.showToast("Saved to Photos")
                 case .share:
                     let url = FileManager.default.temporaryDirectory
-                        .appendingPathComponent("Photo Editor \(Self.stamp()).\(format.utType.preferredFilenameExtension ?? "jpg")")
+                        .appendingPathComponent("Photo Editor \(Self.stamp()).\(s.format.utType.preferredFilenameExtension ?? "jpg")")
                     try data.write(to: url)
                     await model.commit()
                     working = nil
@@ -137,6 +172,16 @@ struct SaveSheet: View {
                 errorMessage = error.localizedDescription
             }
         }
+    }
+
+    /// Encodes with the current settings so the size is known, and Save can reuse the bytes.
+    private func estimate() async {
+        try? await Task.sleep(for: .milliseconds(250))
+        guard !Task.isCancelled else { return }
+        let s = settings
+        let data = try? await Exporter.export(document: model.document, session: model.session, format: s.format,
+                                              size: s.size, quality: s.quality, keepLocation: s.keepLocation)
+        if let data, !Task.isCancelled { prepared = (s, data) }
     }
 
     private static func stamp() -> String {

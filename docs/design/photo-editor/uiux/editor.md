@@ -97,8 +97,14 @@ one layer   only "Photo" row + hint "Add text, stickers or a cutout to get layer
 ╭──────────────────────────────────────────────────────╮
 │ Format              [ HEIC | JPEG | PNG ]            │ ← PNG auto-picked
 ├──────────────────────────────────────────────────────┤   when there's
-│ Size       [ FULL | 4K | 2K ]    6048×4032           │   transparency
-╰──────────────────────────────────────────────────────╯
+│ Size       [ FULL | 4K | 2K | HD ]                   │   transparency
+│                                   6048×4032          │
+├──────────────────────────────────────────────────────┤
+│ Quality         [ HIGH | MEDIUM | SMALL ]            │ ← hidden for PNG;
+├──────────────────────────────────────────────────────┤   remembered
+│ File size                              3.4 MB  / ⟳   │ ← real encode, 250 ms
+╰──────────────────────────────────────────────────────╯   debounce; Save
+                                                           reuses the bytes
             [[ Save to Photos ]]
                ( Share… )                                ← [share sheet]
 ```
