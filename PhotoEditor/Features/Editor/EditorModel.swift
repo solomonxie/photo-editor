@@ -73,7 +73,9 @@ final class EditorModel {
     enum BrushTarget: Equatable { case heal, magicErase, reshape(ManualWarp.Kind) }
     var reshapeKind: ManualWarp.Kind = .push
 
-    private var saveTask: Task<Void, Never>?
+    private var savedDocument: EditDocument
+
+    var hasUnsavedChanges: Bool { document != savedDocument }
 
     init(project: Project, document: EditDocument, session: RenderSession) {
         self.project = project
@@ -82,6 +84,7 @@ final class EditorModel {
         #else
         self.document = document
         #endif
+        self.savedDocument = document
         self.session = session
         updateViewportImage()
         #if DEBUG
@@ -148,7 +151,6 @@ final class EditorModel {
         }
         updateViewportImage()
         redraw()
-        scheduleSave()
     }
 
     func redraw() {
@@ -250,33 +252,26 @@ final class EditorModel {
 
     // MARK: persistence
 
-    private func scheduleSave() {
-        saveTask?.cancel()
-        let doc = document
-        let project = project
-        saveTask = Task {
-            try? await Task.sleep(for: .milliseconds(600))
-            guard !Task.isCancelled else { return }
-            await Self.persist(doc, project)
-            ProjectStore.shared.didSave(project)
-        }
-    }
-
     @concurrent
     private static func persist(_ doc: EditDocument, _ project: Project) async {
         try? ProjectStore.save(doc, to: project)
     }
 
-    /// Flush pending save and refresh the Home thumbnail.
-    func close() async {
-        saveTask?.cancel()
+    /// Writes the edit to disk; called only after the user saves or shares.
+    func commit() async {
         let doc = document
         let project = project
         let image = pipeline().image()
         await Self.persist(doc, project)
         await Self.writeThumb(image, project)
+        savedDocument = doc
         ProjectStore.shared.didSave(project)
         ProjectStore.shared.thumbnailUpdated(project)
+    }
+
+    /// Drops unsaved edits; a photo that was never saved leaves no trace.
+    func discard() {
+        ProjectStore.shared.discardIfUnsaved(project)
     }
 
     @concurrent

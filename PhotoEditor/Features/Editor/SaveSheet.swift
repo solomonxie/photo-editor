@@ -115,6 +115,7 @@ struct SaveSheet: View {
                 switch action {
                 case .save:
                     try await PhotoSaver.save(data)
+                    await model.commit()
                     working = nil
                     dismiss()
                     model.showToast("Saved to Photos")
@@ -122,6 +123,7 @@ struct SaveSheet: View {
                     let url = FileManager.default.temporaryDirectory
                         .appendingPathComponent("Photo Editor \(Self.stamp()).\(format.utType.preferredFilenameExtension ?? "jpg")")
                     try data.write(to: url)
+                    await model.commit()
                     working = nil
                     shareURL = url
                 }
