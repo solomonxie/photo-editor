@@ -13,6 +13,8 @@ nonisolated struct EditDocument: Codable, Equatable, Sendable {
     var filter: FilterRef?
     var smoothSkin: Double = 0
     var redEye = false
+    var beauty: [BeautyKey: Double] = [:]
+    var makeup: [MakeupPart: MakeupItem] = [:]
     var reshape = ReshapeSpec()
     var cutout: CutoutSpec?
     var layers: [Layer] = []
@@ -32,6 +34,8 @@ nonisolated struct EditDocument: Codable, Equatable, Sendable {
         filter = try c.decodeIfPresent(FilterRef.self, forKey: .filter)
         smoothSkin = try c.decodeIfPresent(Double.self, forKey: .smoothSkin) ?? 0
         redEye = try c.decodeIfPresent(Bool.self, forKey: .redEye) ?? false
+        beauty = try c.decodeIfPresent([BeautyKey: Double].self, forKey: .beauty) ?? [:]
+        makeup = try c.decodeIfPresent([MakeupPart: MakeupItem].self, forKey: .makeup) ?? [:]
         reshape = try c.decodeIfPresent(ReshapeSpec.self, forKey: .reshape) ?? ReshapeSpec()
         cutout = try c.decodeIfPresent(CutoutSpec.self, forKey: .cutout)
         layers = try c.decodeIfPresent([Layer].self, forKey: .layers) ?? []
@@ -117,6 +121,22 @@ nonisolated struct PatchOp: Codable, Equatable, Sendable, Identifiable {
     var mask: [BrushStroke]?
 
     enum Kind: String, Codable, Sendable { case magicErase, fill, restyle }
+}
+
+// MARK: - Beauty & makeup
+
+nonisolated enum BeautyKey: String, Codable, CodingKeyRepresentable, CaseIterable, Sendable {
+    case whiten, evenTone, deShine, darkCircles, brightEyes, teeth
+}
+
+nonisolated enum MakeupPart: String, Codable, CodingKeyRepresentable, CaseIterable, Sendable {
+    case lips, blush, brows, liner, contour, hair
+}
+
+nonisolated struct MakeupItem: Codable, Equatable, Sendable {
+    var color: RGBA
+    /// 0…100.
+    var amount: Double
 }
 
 // MARK: - Reshape

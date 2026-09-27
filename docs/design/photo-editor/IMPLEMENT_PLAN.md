@@ -97,7 +97,7 @@ Everything a Meitu user reaches for after smoothing and slimming. Face ops first
 (they share the landmark masks), then canvas-level tools, then the multi-photo
 features, which reuse the exporter and pipeline unchanged.
 
-- [ ] T7.1 Face masks + Beauty — extend `FaceAnalysis` (lips, brows, eye polygons), mask painter; Retouch → Beauty with whiten, even tone, de-shine, dark circles, bright eyes, teeth, Auto looks — see `Engine/Ops/Beauty.swift`, `uiux/beauty.md` — depends: T4.2
+- [x] T7.1 Face masks + Beauty — extend `FaceAnalysis` (lips, brows, eye polygons), mask painter; Retouch → Beauty with whiten, even tone, de-shine, dark circles, bright eyes, teeth, Auto looks — see `Engine/Ops/Beauty.swift`, `uiux/beauty.md` — depends: T4.2
 - [ ] T7.2 Makeup + hair — lips, blush, brows, liner, contour, looks; hair = person mask ∩ head − face — see `Engine/Ops/Makeup.swift`, `Features/Editor/Tools/Makeup` — depends: T7.1
 - [ ] T7.3 Reshape head / neck — see `Engine/Ops/Reshape.swift` — depends: T4.5
 - [ ] T7.4 Mosaic + Draw — mosaic strokes in the doc; drawing as a layer kind — see `Engine/Ops/Mosaic.swift`, `Engine/Ops/Layers.swift`, `uiux/creative.md` — depends: T3.4

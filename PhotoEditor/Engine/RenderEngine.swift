@@ -66,6 +66,7 @@ nonisolated struct RenderPipeline {
         img = applyAdjust(img)
         img = applyFilter(img)
         img = applySmoothSkin(img, unedited: preGeometry)
+        img = applyBeauty(img)
         img = applyCutout(img)
         if options.highlightSubjects, document.cutout?.background == .keep {
             img = highlightSubjects(img)
