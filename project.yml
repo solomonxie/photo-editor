@@ -30,6 +30,7 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
         NSPhotoLibraryAddUsageDescription: "Save your edited photos to your library."
+        NSPhotoLibraryUsageDescription: "Compress reads only the photos and videos you choose, adds smaller copies, and deletes originals only when you confirm."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.solomonxie.photoeditor.app

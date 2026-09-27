@@ -8,6 +8,7 @@ import UIKit
 ///   -tool <adjust|filters|…>              initial tool
 ///   -sheet <save|layers>                  present a sheet on open
 ///   -settings                             push Settings from Home
+///   -compress                             push Compress from Home
 ///   -patch '<json>'                       merge into the document on open (not saved)
 ///   -select <index>                       select that layer
 enum DebugLaunch {

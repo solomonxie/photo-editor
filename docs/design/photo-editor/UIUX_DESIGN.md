@@ -12,6 +12,7 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
    ┌ Home ┐──tap recent────────────────┐
    │      │──Open Photo──▶ [PhotosPicker]──pick──┐
    │  ⚙ ──┼──▶ Settings ──Add AI Key──▶ Add Key (sheet)
+   │  ⇲ ──┼──▶ Compress ──Choose──▶ [PhotosPicker, multi]
    └──────┘◀─────✕───────┐              ▼        ▼
                          └──────────── Editor ◀──┘
                                         │
@@ -33,6 +34,7 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
 | Layers | half sheet | [uiux/editor.md](uiux/editor.md#layers-sheet) |
 | Save | half sheet | [uiux/editor.md](uiux/editor.md#save-sheet) |
 | Settings | pushed page | [uiux/settings.md](uiux/settings.md) |
+| Compress | pushed page | [uiux/compress.md](uiux/compress.md) |
 | Add AI Key | half sheet | [uiux/settings.md](uiux/settings.md#add-ai-key-sheet) |
 | Shared parts | — | [uiux/components.md](uiux/components.md) |
 
