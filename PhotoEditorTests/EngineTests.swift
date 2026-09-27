@@ -194,3 +194,24 @@ final class WarpTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode(EditDocument.self, from: JSONEncoder().encode(doc)), doc)
     }
 }
+
+final class AIErrorTests: XCTestCase {
+    func testGeminiBadKeyIsAuth() {
+        let body = #"{"error":{"code":400,"message":"API key not valid.","status":"INVALID_ARGUMENT","details":[{"reason":"API_KEY_INVALID"}]}}"#
+        let (code, message) = HTTP.parseError(Data(body.utf8))
+        let e = AIError(vendor: .gemini, status: 400, code: code, message: message ?? "")
+        XCTAssertTrue(e.isAuth)
+        XCTAssertTrue(e.shouldFallback)
+    }
+
+    func testOpenAIBadKeyIsAuth() {
+        let body = #"{"error":{"message":"Incorrect API key","type":"invalid_request_error","code":"invalid_api_key"}}"#
+        let (code, _) = HTTP.parseError(Data(body.utf8))
+        XCTAssertEqual(code, "invalid_api_key")
+        XCTAssertTrue(AIError(vendor: .openAI, status: 401, code: code, message: "").isAuth)
+    }
+
+    func testBadRequestDoesNotFallBack() {
+        XCTAssertFalse(AIError(vendor: .openAI, status: 400, code: "invalid_value", message: "").shouldFallback)
+    }
+}
