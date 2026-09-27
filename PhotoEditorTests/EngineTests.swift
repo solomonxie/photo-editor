@@ -1,0 +1,196 @@
+import CoreImage
+import XCTest
+@testable import PhotoEditor
+
+final class EditDocumentTests: XCTestCase {
+    private func sampleDoc() -> EditDocument {
+        var doc = EditDocument(source: SourceInfo(filename: "original.heic", pixelWidth: 4032, pixelHeight: 3024))
+        doc.adjust[.exposure] = 24
+        doc.adjust[.warmth] = -10
+        doc.filter = FilterRef(id: "film", intensity: 0.8)
+        doc.crop = CropSpec(quarterTurns: 1, flipped: true, angle: 2.5, rect: CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.7))
+        doc.heal = [BrushStroke(points: [CGPoint(x: 0.4, y: 0.4), CGPoint(x: 0.42, y: 0.41)], radius: 0.01)]
+        doc.cutout = CutoutSpec(subjects: [1, 2], background: .blur)
+        doc.layers = [
+            Layer(content: .text(TextSpec(string: "Summer in Kyoto"))),
+            Layer(content: .emoji("🌴"), width: 0.2),
+            Layer(content: .image(asset: "a.png", aspect: 1.5)),
+        ]
+        return doc
+    }
+
+    func testRoundTrip() throws {
+        let doc = sampleDoc()
+        let data = try JSONEncoder().encode(doc)
+        XCTAssertEqual(try JSONDecoder().decode(EditDocument.self, from: data), doc)
+    }
+
+    func testDecodesMissingKeysAsDefaults() throws {
+        let json = #"{"source":{"filename":"o.jpg","pixelWidth":10,"pixelHeight":20},"futureKey":42}"#
+        let doc = try JSONDecoder().decode(EditDocument.self, from: Data(json.utf8))
+        XCTAssertTrue(doc.isUntouched)
+    }
+
+    func testAdjustZeroRemovesKey() {
+        var a = AdjustValues()
+        a[.contrast] = 30
+        a[.contrast] = 0
+        XCTAssertTrue(a.isIdentity)
+    }
+}
+
+final class EditHistoryTests: XCTestCase {
+    func testGestureFoldsIntoOneStep() {
+        var history = EditHistory()
+        var doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
+        let original = doc
+        history.beginGesture(doc)
+        for v in stride(from: 1.0, through: 40, by: 1) {
+            doc.adjust[.exposure] = v
+            history.record(doc) // ignored during a gesture
+        }
+        history.endGesture(doc)
+        XCTAssertEqual(history.undoStack.count, 1)
+        let undone = history.undo(doc)
+        XCTAssertEqual(undone, original)
+        XCTAssertEqual(history.redo(original), doc)
+    }
+
+    func testNewEditClearsRedo() {
+        var history = EditHistory()
+        var doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
+        history.record(doc)
+        doc.adjust[.contrast] = 10
+        _ = history.undo(doc)
+        XCTAssertTrue(history.canRedo)
+        history.record(doc)
+        XCTAssertFalse(history.canRedo)
+    }
+
+    func testLimit() {
+        var history = EditHistory(limit: 3)
+        let doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
+        for _ in 0..<10 { history.record(doc) }
+        XCTAssertEqual(history.undoStack.count, 3)
+    }
+}
+
+final class GeometryTests: XCTestCase {
+    func testQuarterTurnSwapsSize() {
+        let g = CropGeometry(crop: CropSpec(quarterTurns: 1), sourceSize: CGSize(width: 400, height: 300))
+        XCTAssertEqual(g.outputSize, CGSize(width: 300, height: 400))
+    }
+
+    func testCropRectIsTopLeftNormalized() {
+        let crop = CropSpec(rect: CGRect(x: 0, y: 0, width: 0.5, height: 0.5))
+        let g = CropGeometry(crop: crop, sourceSize: CGSize(width: 400, height: 300))
+        // Top-left quarter in CI (y-up) coordinates.
+        XCTAssertEqual(g.cropRect, CGRect(x: 0, y: 150, width: 200, height: 150))
+    }
+
+    func testStraightenCoversFrame() {
+        let size = CGSize(width: 400, height: 300)
+        let g = CropGeometry(crop: CropSpec(angle: 10), sourceSize: size)
+        let corners = [CGPoint.zero, CGPoint(x: 400, y: 0), CGPoint(x: 0, y: 300), CGPoint(x: 400, y: 300)]
+        // Every output corner must map back inside the source.
+        let inv = g.straightenTransform.inverted()
+        for c in corners {
+            let p = c.applying(inv)
+            XCTAssertTrue(p.x >= -0.5 && p.x <= 400.5 && p.y >= -0.5 && p.y <= 300.5, "\(c) → \(p)")
+        }
+    }
+}
+
+final class RenderTests: XCTestCase {
+    private func render(_ doc: EditDocument, source: CIImage) throws -> [Float] {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("t-\(UUID()).png")
+        try RenderEngine.context.writePNGRepresentation(of: source, to: url, format: .RGBA8, colorSpace: RenderEngine.outputSpace)
+        let session = try RenderSession(originalURL: url, assetsURL: FileManager.default.temporaryDirectory, proxyMaxPixel: 64)
+        let out = RenderPipeline(session: session, document: doc, source: session.proxy).image()
+        var px = [Float](repeating: 0, count: 4)
+        let center = CGRect(x: out.extent.midX, y: out.extent.midY, width: 1, height: 1)
+        RenderEngine.context.render(out, toBitmap: &px, rowBytes: 16, bounds: center, format: .RGBAf, colorSpace: RenderEngine.outputSpace)
+        return px
+    }
+
+    private var gray: CIImage {
+        CIImage(color: CIColor(red: 0.5, green: 0.5, blue: 0.5)).cropped(to: CGRect(x: 0, y: 0, width: 64, height: 48))
+    }
+
+    private var doc: EditDocument {
+        EditDocument(source: SourceInfo(filename: "t.png", pixelWidth: 64, pixelHeight: 48))
+    }
+
+    func testWarmthPositiveIsWarmer() throws {
+        var d = doc
+        d.adjust[.warmth] = 60
+        let px = try render(d, source: gray)
+        XCTAssertGreaterThan(px[0], px[2], "warm should push red above blue: \(px)")
+    }
+
+    func testExposureBrightens() throws {
+        var d = doc
+        d.adjust[.exposure] = 50
+        let px = try render(d, source: gray)
+        XCTAssertGreaterThan(px[1], 0.55)
+    }
+
+    func testIdentityIsNoOp() throws {
+        let px = try render(doc, source: gray)
+        XCTAssertEqual(px[0], 0.5, accuracy: 0.02)
+    }
+
+    func testEveryFilterRenders() throws {
+        for preset in FilterCatalog.presets {
+            var d = doc
+            d.filter = FilterRef(id: preset.id)
+            let px = try render(d, source: gray)
+            XCTAssertFalse(px[0].isNaN, preset.id)
+        }
+    }
+
+    func testTextLayerRenders() throws {
+        var d = doc
+        d.layers = [Layer(content: .text(TextSpec(string: "HELLO", color: RGBA(r: 1, g: 0, b: 0), style: .background)), width: 0.9)]
+        let px = try render(d, source: gray)
+        XCTAssertGreaterThan(px[0], px[1] + 0.1, "text should tint centre red: \(px)")
+    }
+
+    func testEmojiLayerRenders() throws {
+        var d = doc
+        d.layers = [Layer(content: .emoji("🟥"), width: 0.9)]
+        let px = try render(d, source: gray)
+        XCTAssertGreaterThan(abs(px[0] - 0.5) + abs(px[1] - 0.5), 0.1, "emoji should change centre: \(px)")
+    }
+}
+
+final class WarpTests: XCTestCase {
+    /// Uniform field pulling from 0.25 above: the white top half must move down.
+    func testTranslationDirection() throws {
+        let w: CGFloat = 64, h: CGFloat = 64
+        let white = CIImage(color: .white).cropped(to: CGRect(x: 0, y: h / 2, width: w, height: h / 2))
+        let img = white.composited(over: CIImage(color: .black).cropped(to: CGRect(x: 0, y: 0, width: w, height: h)))
+        var field = WarpField(aspect: 1, longEdge: 16)
+        for i in field.dy.indices { field.dy[i] = 0.25 }
+        let out = try WarpProcessor.apply(withExtent: img.extent, inputs: [img, field.image(size: img.extent.size)],
+                                          arguments: ["width": w, "height": h, "margin": 20])
+        var px = [Float](repeating: 0, count: 4)
+        // Top-left y = 0.6 → CI y = 0.4h: was black, should now be white.
+        RenderEngine.context.render(out, toBitmap: &px, rowBytes: 16, bounds: CGRect(x: 32, y: 0.4 * h, width: 1, height: 1),
+                                    format: .RGBAf, colorSpace: nil)
+        XCTAssertGreaterThan(px[0], 0.9, "\(px)")
+        // Top-left y = 0.9 → still black.
+        RenderEngine.context.render(out, toBitmap: &px, rowBytes: 16, bounds: CGRect(x: 32, y: 0.1 * h, width: 1, height: 1),
+                                    format: .RGBAf, colorSpace: nil)
+        XCTAssertLessThan(px[0], 0.1, "\(px)")
+    }
+
+    func testReshapeDocumentRoundTrips() throws {
+        var doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
+        doc.reshape.face[.eyes] = 30
+        doc.reshape.body[.waist] = 40
+        doc.reshape.manual = [ManualWarp(kind: .push, center: CGPoint(x: 0.5, y: 0.5), vector: CGVector(dx: 0.01, dy: 0), radius: 0.1)]
+        doc.redEye = true
+        XCTAssertEqual(try JSONDecoder().decode(EditDocument.self, from: JSONEncoder().encode(doc)), doc)
+    }
+}
