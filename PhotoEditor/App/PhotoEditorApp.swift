@@ -19,10 +19,8 @@ struct RootView: View {
         }
         .fullScreenCover(item: $editor) { model in
             EditorView(model: model) {
-                Task {
-                    await model.close()
-                    editor = nil
-                }
+                model.discard()
+                editor = nil
             }
         }
         .alert("Couldn't open this edit", isPresented: Binding(get: { loadingError != nil }, set: { if !$0 { loadingError = nil } })) {

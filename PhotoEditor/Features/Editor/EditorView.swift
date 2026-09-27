@@ -6,6 +6,7 @@ struct EditorView: View {
 
     @State private var showLayers = false
     @State private var showSave = false
+    @State private var confirmDiscard = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -50,6 +51,7 @@ struct EditorView: View {
                     model.showToast("Exported \(name)")
                 }
             }
+            if DebugLaunch.has("-close") { confirmDiscard = model.hasUnsavedChanges }
             switch DebugLaunch.sheet {
             case "save": showSave = true
             case "layers": showLayers = true
@@ -64,12 +66,19 @@ struct EditorView: View {
     private var topBar: some View {
         HStack(spacing: 4) {
             Button {
-                onClose()
+                if model.hasUnsavedChanges { confirmDiscard = true } else { onClose() }
             } label: {
                 Image(systemName: "xmark")
                     .frame(width: 40, height: 40)
             }
             .accessibilityLabel("Close")
+            .confirmationDialog("Discard changes?", isPresented: $confirmDiscard, titleVisibility: .visible) {
+                Button("Discard Changes", role: .destructive, action: onClose)
+                Button("Save…") { showSave = true }
+                Button("Keep Editing", role: .cancel) {}
+            } message: {
+                Text("Your edits haven't been saved.")
+            }
 
             Button { model.undo() } label: {
                 Image(systemName: "arrow.uturn.backward").frame(width: 40, height: 40)

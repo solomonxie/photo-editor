@@ -1,7 +1,7 @@
 # Editor
 
-Full-screen, always dark. It's reached from Home (a new pick or a recent) and
-autosaves on every op.
+Full-screen, always dark. It's reached from Home (a new pick or a recent). Edits
+are kept only when saved or shared; ✕ with unsaved edits asks "Discard changes?".
 
 ```
  ✕        ↶   ↷              Compare   Layers   [[ Save ]]

@@ -64,12 +64,15 @@ Generative AI
                  └─ offline ─▶ Run disabled, "You're offline"
 
 Leave
- Editor ─✕─▶ Home   (autosaved; no "discard?" prompt)
+ Editor ─✕─▶ Home                        (no unsaved edits)
+        └─✕─▶ "Discard changes?" ─┬─ Discard ─▶ Home (a never-saved new photo leaves Recent)
+                                 ├─ Save… ─▶ Save sheet
+                                 └─ Keep Editing
 ```
 
 ## Principles applied
 
-- **Autosave, never ask.** Every op is persisted the moment it's made, and undo is the safety net.
+- **Save is explicit.** Edits persist only on Save or Share; leaving with unsaved edits asks first.
 - **The photo is the UI.** Chrome is dark and minimal. Panels never cover the canvas: the canvas shrinks.
 - **Hold to compare.** Press and hold the canvas (or the Compare button) to show the original.
 - **Degrade, never error** (`byo-ai-keys.md`). With no key, only the three generative
