@@ -8,7 +8,7 @@ final class Viewport {
     var imageSize: CGSize = CGSize(width: 1, height: 1)
     var zoom: CGFloat = 1
     var offset: CGSize = .zero
-    var padding: CGFloat = 12
+    var padding: CGFloat = 20
 
     static let maxZoom: CGFloat = 16
 
