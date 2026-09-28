@@ -197,8 +197,8 @@ struct ReshapeBrushOverlay: View {
     }
 
     private func add(at p: CGPoint, from prev: CGPoint) {
-        let src = model.sourcePoint(fromOutput: model.viewport.normalized(p))
-        let srcPrev = model.sourcePoint(fromOutput: model.viewport.normalized(prev))
+        let src = model.viewport.normalized(p)
+        let srcPrev = model.viewport.normalized(prev)
         let size = model.document.source.size
         let radius = model.sourceRadius(points: brushSize * 1.6) * max(size.width, size.height) / size.height
         let warp = ManualWarp(kind: kind, center: srcPrev,

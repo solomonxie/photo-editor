@@ -37,10 +37,9 @@ No capabilities are needed (no iCloud, no push, no App Groups).
 
 - [ ] `make ios` → Release build on the paired iPhone.
 - [ ] Smoke test:
-  - Open a photo, then adjust, filter and crop it.
   - Retouch → Smooth skin on a face, and heal a spot.
   - Reshape → Body on a full-length photo.
-  - Cutout → Blur, then add text and a sticker.
+  - Cutout → Blur, then Copy as Sticker.
   - Save to Photos (grant add-only access). Open Photos and check the result.
   - Reopen the edit from Home: every slider is still adjustable.
   - Home → ⇲ Compress: pick a few photos and a video, compress, check the copies in Photos, delete originals.
@@ -127,14 +126,11 @@ Recapture with photos you're happy to publish (a model-released stock photo is s
 1. `make ios` — a Release build.
 2. Status bar: full battery, Wi-Fi, no notification banners. Side button + Volume Up per shot.
 3. Shots, in upload order (3 minimum, 10 maximum — the first two are what people actually see):
-   1. **Adjust** — a warm, lifted beach or street photo, Exposure slider showing
-   2. **Reshape** — a full-length photo, Body → Waist moved
-   3. **Retouch** — a close-up portrait, Smooth skin at ~40
-   4. **Cutout** — a person with the background on Blur (reads as Portrait mode)
-   5. **Filters** — the thumbnail strip with one look selected
-   6. **Text & stickers** — a caption and a sticker on a travel photo
-   7. **AI** — Fill with "fuller hair" typed (needs a key in Settings)
-   8. **Home** — a grid of your recent edits
+   1. **Cutout** — a person with the background on Blur (reads as Portrait mode)
+   2. **Retouch** — a close-up portrait, Smooth skin at ~40
+   3. **Reshape** — a full-length photo, Body → Waist moved
+   4. **AI** — Fill with "fuller hair" typed (needs a key in Settings)
+   5. **Home** — a grid of your recent edits
 4. AirDrop to the Mac, e.g. `~/Desktop/shots/`, then:
 
 ```
@@ -142,7 +138,7 @@ make screenshots SHOTS=~/Desktop/shots
 ```
 
 Outputs overwrite `docs/release/screenshots/{6.9,6.5}/`, named after the files you fed in —
-so name them `01-adjust.png`, `02-reshape.png` … and the upload order sorts itself.
+so name them `01-cutout.png`, `02-retouch.png` … and the upload order sorts itself.
 Drag the `6.9` folder's files into the 6.9" slot.
 
 App Preview video: skip for 1.0.
@@ -173,10 +169,10 @@ App Preview video: skip for 1.0.
 | App Review → Attachment | none |
 | Version Release | **Manually release this version** |
 
-Promotional Text (145/170):
+Promotional Text (138/170):
 
 ```
-Edit photos on your iPhone, no subscription: smooth skin, reshape face and body, filters, cutout and text. Everything but AI stays on the device.
+Edit photos on your iPhone, no subscription: background cutout, smooth skin, reshape face and body. Everything but AI stays on the device.
 ```
 
 Description:
@@ -194,19 +190,10 @@ RESHAPE
 • Body: waist, hips, chest, legs, shoulders and arms, placed by on-device pose detection
 • A manual brush to push, grow or shrink anything by hand
 
-ADJUST AND FILTERS
-• Exposure, brilliance, brightness, contrast, highlights, shadows, saturation, vibrance, warmth, tint, sharpness, vignette and grain — or one tap on Auto
-• 16 looks, from Vivid and Film to Cinema and Noir, each with its own strength slider
-• Crop with a straighten dial, rotate, flip and ratios for every feed
-
 CUTOUT
 • Find the people, pets and objects in a photo automatically
 • Remove the background, blur it like Portrait mode, or swap it for a colour
-• Lift a subject out as a sticker you can place anywhere
-
-TEXT AND STICKERS
-• Captions in five typefaces with outline, background and shadow styles
-• Emoji and shapes as stickers; move, pinch, rotate, reorder and fade them as layers
+• Lift a subject out as a sticker; move, pinch, rotate, reorder and fade it as a layer
 
 NOTHING IS FINAL
 Every edit stays adjustable. Save a photo, come back next week, and every slider is where you left it. Saving always adds a new photo — your original is never touched.
@@ -221,10 +208,10 @@ PRIVATE
 Photos are picked with the system picker, and saving needs add-only access. Only the optional Compress tool asks for library access, to shrink the items you choose. No analytics, no ads, no tracking.
 ```
 
-Keywords (95/100 — "photo" and "editor" are omitted, the name already indexes them):
+Keywords (99/100 — "photo" and "editor" are omitted, the name already indexes them):
 
 ```
-beauty,body,face,slim,skin,blemish,filter,crop,cutout,background,blur,sticker,text,selfie,waist
+beauty,body,face,slim,skin,blemish,makeup,eyes,cutout,background,blur,sticker,portrait,selfie,waist
 ```
 
 App Review Notes:
@@ -248,7 +235,7 @@ What's New: not shown for a first version. From 1.1 on, write it here.
 | Field | Value |
 |---|---|
 | Name | `Photo Editor: Retouch & Shape` (29/30) |
-| Subtitle | `Face & body reshape, filters` (28/30) |
+| Subtitle | `Cutout, face & body reshape` (27/30) |
 | Category — Primary | Photo & Video |
 | Category — Secondary | Lifestyle |
 | Content Rights | **No**, it does not contain, show, or access third-party content |

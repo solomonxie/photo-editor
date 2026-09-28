@@ -33,6 +33,8 @@ with watermarks and ads.
 - Android, iPad-specific layout, Mac.
 - Video editing, RAW / ProRAW development. (Video is only re-encoded by Compress.) (`CIRAWFilter` keeps adding them later cheap.)
 - Accounts, cloud sync, social feed, template marketplace.
+- Commodity edits the Photos app already has: crop, rotate, straighten, flip, filters,
+  light/colour adjustments, text and emoji stickers. Removed 2026-09 to focus on what Photos can't do.
 - AI "beauty filters" that regenerate a face. (Makeup and hair colour are on-device tints, v1.1.)
 - Replacing the original in Photos. v1 always saves a copy.
 - An in-app library browser. The system picker covers it.

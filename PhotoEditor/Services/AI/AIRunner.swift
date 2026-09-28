@@ -39,11 +39,8 @@ enum AIRunner {
         let order = keys.attemptOrder()
         guard !order.isEmpty else { throw Failure.noKeys }
 
-        // The photo as it stands before geometry: existing patches and heal applied.
+        // The photo with existing patches and heal applied.
         var doc = model.document
-        doc.crop = CropSpec()
-        doc.adjust = AdjustValues()
-        doc.filter = nil
         doc.smoothSkin = 0
         doc.cutout = nil
         doc.layers = []

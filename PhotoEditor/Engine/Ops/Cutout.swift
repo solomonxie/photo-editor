@@ -58,12 +58,12 @@ nonisolated extension RenderPipeline {
     func highlightSubjects(_ img: CIImage) -> CIImage {
         guard let spec = document.cutout, let sourceMask = subjectMask(spec) else { return img }
         let dimmed = img.applyingFilter("CIColorControls", parameters: [kCIInputBrightnessKey: -0.35, kCIInputSaturationKey: 0.4])
-        return Self.blend(dimmed, img, mask: toOutput(sourceMask)).cropped(to: img.extent)
+        return Self.blend(dimmed, img, mask: sourceMask).cropped(to: img.extent)
     }
 
     func applyCutout(_ img: CIImage) -> CIImage {
         guard let spec = document.cutout, spec.background != .keep, let sourceMask = subjectMask(spec) else { return img }
-        let mask = toOutput(sourceMask)
+        let mask = sourceMask
         let extent = img.extent
         let background: CIImage
         switch spec.background {

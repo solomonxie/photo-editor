@@ -5,9 +5,7 @@ struct CanvasOverlays: View {
 
     var body: some View {
         ZStack {
-            if model.isCropping {
-                CropOverlay(model: model)
-            } else if case .reshape(let kind) = model.brushTarget {
+            if case .reshape(let kind) = model.brushTarget {
                 ReshapeBrushOverlay(model: model, kind: kind)
             } else if let target = model.brushTarget {
                 BrushOverlay(model: model, target: target)
@@ -44,9 +42,6 @@ struct LayerSelectionOverlay: View {
                 .frame(width: w + 16, height: h + 16)
                 .contentShape(Rectangle())
                 .gesture(moveGesture(frame: frame).simultaneously(with: pinchRotate))
-                .onTapGesture {
-                    if case .text = layer.content { model.editingTextLayerID = layer.id }
-                }
                 .overlay(alignment: .topLeading) {
                     handleButton("xmark") { model.deleteLayer(layer.id) }
                         .offset(x: -14, y: -14)
@@ -179,7 +174,7 @@ struct BrushOverlay: View {
                 .onChanged { g in
                     viewPoints.append(g.location)
                     let n = model.viewport.normalized(g.location)
-                    points.append(model.sourcePoint(fromOutput: n))
+                    points.append(n)
                 }
                 .onEnded { _ in
                     commit()
@@ -225,9 +220,8 @@ struct MaskStrokesView: View {
         let longEdge = max(src.width, src.height)
         Canvas { ctx, _ in
             for stroke in model.brushPreview {
-                let pts = stroke.points.map { viewPoint(fromSource: $0) }
-                let r = stroke.radius * longEdge / model.geometry.outputSize.width * frame.width
-                    * CropGeometry.fillScale(size: model.geometry.rotatedSize, angle: model.document.crop.angle * .pi / 180)
+                let pts = stroke.points.map { model.viewport.viewPoint($0) }
+                let r = stroke.radius * longEdge / src.width * frame.width
                 var path = Path()
                 if let first = pts.first {
                     path.move(to: first)
@@ -239,12 +233,5 @@ struct MaskStrokesView: View {
             }
         }
         .allowsHitTesting(false)
-    }
-
-    private func viewPoint(fromSource n: CGPoint) -> CGPoint {
-        let src = model.document.source.size
-        let out = model.geometry.outputSize
-        let p = CGPoint(x: n.x * src.width, y: (1 - n.y) * src.height).applying(model.geometry.outputTransform)
-        return model.viewport.viewPoint(CGPoint(x: p.x / out.width, y: 1 - p.y / out.height))
     }
 }

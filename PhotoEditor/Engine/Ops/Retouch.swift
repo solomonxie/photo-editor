@@ -135,7 +135,7 @@ nonisolated extension RenderPipeline {
         session.cached("faces") { FaceAnalysis.run(on: session.proxyCGImage) }
     }
 
-    func applySmoothSkin(_ img: CIImage, unedited: CIImage) -> CIImage {
+    func applySmoothSkin(_ img: CIImage) -> CIImage {
         let amount = document.smoothSkin / 100
         guard amount > 0, !faces.faces.isEmpty else { return img }
         let mask = skinMask(for: img)
@@ -146,7 +146,6 @@ nonisolated extension RenderPipeline {
                           width: $0.bounds.width * sourceSize.width, height: $0.bounds.height * sourceSize.height * 1.3) }
             .map { $0.insetBy(dx: 0, dy: -$0.height * 0.08) }
             .reduce(CGRect.null) { $0.union($1) }
-            .applying(geometry.outputTransform)
             .insetBy(dx: -20 * scale, dy: -20 * scale)
             .intersection(img.extent)
         guard !faceRect.isNull, !faceRect.isEmpty else { return img }

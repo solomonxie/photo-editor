@@ -1,7 +1,7 @@
 import CoreImage
 import Foundation
 
-/// Beauty ops on the face masks, in output space.
+/// Beauty ops on the face masks.
 nonisolated extension RenderPipeline {
     func faceMask(_ name: String, feather: CGFloat = 0.008,
                   _ draw: @escaping (FaceAnalysis.Face, CGContext, CGFloat, CGFloat) -> Void) -> CIImage {
@@ -11,13 +11,13 @@ nonisolated extension RenderPipeline {
                 for face in faces.faces { draw(face, ctx, sx, sy) }
             }
         }
-        return toOutput(source)
+        return source
     }
 
     /// Face ovals × "looks like this face's skin", so hair, brows and background inside the oval are left alone.
     func skinMask(for img: CIImage) -> CIImage {
         let key = "skinmask:\(Int(sourceSize.width))"
-        let oval = toOutput(session.cached(key) { faces.mask(size: sourceSize) })
+        let oval = session.cached(key) { faces.mask(size: sourceSize) }
         guard let cube = skinCube else { return oval }
         let likely = img.applyingFilter("CIColorCubeWithColorSpace", parameters: [
             "inputCubeDimension": SkinTone.cubeSize,

@@ -78,12 +78,11 @@ struct CutoutPanel: View {
         doc.cutout = nil
         doc.layers = []
         let base = model.pipeline(doc).image()
-        let outMask = pipeline.toOutput(mask)
         let cut = base.applyingFilter("CIBlendWithMask", parameters: [
             kCIInputBackgroundImageKey: CIImage.clear.cropped(to: base.extent),
-            kCIInputMaskImageKey: outMask,
+            kCIInputMaskImageKey: mask,
         ])
-        guard let w = AssetWriter.writeTrimmedPNG(cut, alphaSource: outMask, to: model.project.assetsURL) else { return }
+        guard let w = AssetWriter.writeTrimmedPNG(cut, alphaSource: mask, to: model.project.assetsURL) else { return }
         let ext = base.extent
         let center = CGPoint(x: (w.bounds.midX - ext.minX) / ext.width, y: 1 - (w.bounds.midY - ext.minY) / ext.height)
         model.addLayer(Layer(content: .image(asset: w.name, aspect: w.aspect), center: center, width: w.bounds.width / ext.width))

@@ -5,15 +5,11 @@ import XCTest
 final class EditDocumentTests: XCTestCase {
     private func sampleDoc() -> EditDocument {
         var doc = EditDocument(source: SourceInfo(filename: "original.heic", pixelWidth: 4032, pixelHeight: 3024))
-        doc.adjust[.exposure] = 24
-        doc.adjust[.warmth] = -10
-        doc.filter = FilterRef(id: "film", intensity: 0.8)
-        doc.crop = CropSpec(quarterTurns: 1, flipped: true, angle: 2.5, rect: CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.7))
+        doc.smoothSkin = 40
+        doc.beauty[.whiten] = 30
         doc.heal = [BrushStroke(points: [CGPoint(x: 0.4, y: 0.4), CGPoint(x: 0.42, y: 0.41)], radius: 0.01)]
         doc.cutout = CutoutSpec(subjects: [1, 2], background: .blur)
         doc.layers = [
-            Layer(content: .text(TextSpec(string: "Summer in Kyoto"))),
-            Layer(content: .emoji("🌴"), width: 0.2),
             Layer(content: .image(asset: "a.png", aspect: 1.5)),
         ]
         return doc
@@ -31,11 +27,10 @@ final class EditDocumentTests: XCTestCase {
         XCTAssertTrue(doc.isUntouched)
     }
 
-    func testAdjustZeroRemovesKey() {
-        var a = AdjustValues()
-        a[.contrast] = 30
-        a[.contrast] = 0
-        XCTAssertTrue(a.isIdentity)
+    func testDropsRemovedLayerKinds() throws {
+        let json = #"{"source":{"filename":"o.jpg","pixelWidth":10,"pixelHeight":20},"layers":[{"id":"8E1B6C1A-6A3E-4C1B-9A43-2B8D5E7F0A11","content":{"emoji":{"_0":"🌴"}},"center":[0.5,0.5],"width":0.2,"rotation":0,"opacity":1,"isHidden":false},{"id":"8E1B6C1A-6A3E-4C1B-9A43-2B8D5E7F0A12","content":{"image":{"asset":"a.png","aspect":1.5}},"center":[0.5,0.5],"width":0.6,"rotation":0,"opacity":1,"isHidden":false}]}"#
+        let doc = try JSONDecoder().decode(EditDocument.self, from: Data(json.utf8))
+        XCTAssertEqual(doc.layers.map(\.content), [.image(asset: "a.png", aspect: 1.5)])
     }
 }
 
@@ -46,7 +41,7 @@ final class EditHistoryTests: XCTestCase {
         let original = doc
         history.beginGesture(doc)
         for v in stride(from: 1.0, through: 40, by: 1) {
-            doc.adjust[.exposure] = v
+            doc.smoothSkin = v
             history.record(doc) // ignored during a gesture
         }
         history.endGesture(doc)
@@ -60,7 +55,7 @@ final class EditHistoryTests: XCTestCase {
         var history = EditHistory()
         var doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
         history.record(doc)
-        doc.adjust[.contrast] = 10
+        doc.smoothSkin = 10
         _ = history.undo(doc)
         XCTAssertTrue(history.canRedo)
         history.record(doc)
@@ -72,32 +67,6 @@ final class EditHistoryTests: XCTestCase {
         let doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
         for _ in 0..<10 { history.record(doc) }
         XCTAssertEqual(history.undoStack.count, 3)
-    }
-}
-
-final class GeometryTests: XCTestCase {
-    func testQuarterTurnSwapsSize() {
-        let g = CropGeometry(crop: CropSpec(quarterTurns: 1), sourceSize: CGSize(width: 400, height: 300))
-        XCTAssertEqual(g.outputSize, CGSize(width: 300, height: 400))
-    }
-
-    func testCropRectIsTopLeftNormalized() {
-        let crop = CropSpec(rect: CGRect(x: 0, y: 0, width: 0.5, height: 0.5))
-        let g = CropGeometry(crop: crop, sourceSize: CGSize(width: 400, height: 300))
-        // Top-left quarter in CI (y-up) coordinates.
-        XCTAssertEqual(g.cropRect, CGRect(x: 0, y: 150, width: 200, height: 150))
-    }
-
-    func testStraightenCoversFrame() {
-        let size = CGSize(width: 400, height: 300)
-        let g = CropGeometry(crop: CropSpec(angle: 10), sourceSize: size)
-        let corners = [CGPoint.zero, CGPoint(x: 400, y: 0), CGPoint(x: 0, y: 300), CGPoint(x: 400, y: 300)]
-        // Every output corner must map back inside the source.
-        let inv = g.straightenTransform.inverted()
-        for c in corners {
-            let p = c.applying(inv)
-            XCTAssertTrue(p.x >= -0.5 && p.x <= 400.5 && p.y >= -0.5 && p.y <= 300.5, "\(c) → \(p)")
-        }
     }
 }
 
@@ -121,46 +90,9 @@ final class RenderTests: XCTestCase {
         EditDocument(source: SourceInfo(filename: "t.png", pixelWidth: 64, pixelHeight: 48))
     }
 
-    func testWarmthPositiveIsWarmer() throws {
-        var d = doc
-        d.adjust[.warmth] = 60
-        let px = try render(d, source: gray)
-        XCTAssertGreaterThan(px[0], px[2], "warm should push red above blue: \(px)")
-    }
-
-    func testExposureBrightens() throws {
-        var d = doc
-        d.adjust[.exposure] = 50
-        let px = try render(d, source: gray)
-        XCTAssertGreaterThan(px[1], 0.55)
-    }
-
     func testIdentityIsNoOp() throws {
         let px = try render(doc, source: gray)
         XCTAssertEqual(px[0], 0.5, accuracy: 0.02)
-    }
-
-    func testEveryFilterRenders() throws {
-        for preset in FilterCatalog.presets {
-            var d = doc
-            d.filter = FilterRef(id: preset.id)
-            let px = try render(d, source: gray)
-            XCTAssertFalse(px[0].isNaN, preset.id)
-        }
-    }
-
-    func testTextLayerRenders() throws {
-        var d = doc
-        d.layers = [Layer(content: .text(TextSpec(string: "HELLO", color: RGBA(r: 1, g: 0, b: 0), style: .background)), width: 0.9)]
-        let px = try render(d, source: gray)
-        XCTAssertGreaterThan(px[0], px[1] + 0.1, "text should tint centre red: \(px)")
-    }
-
-    func testEmojiLayerRenders() throws {
-        var d = doc
-        d.layers = [Layer(content: .emoji("🟥"), width: 0.9)]
-        let px = try render(d, source: gray)
-        XCTAssertGreaterThan(abs(px[0] - 0.5) + abs(px[1] - 0.5), 0.1, "emoji should change centre: \(px)")
     }
 }
 

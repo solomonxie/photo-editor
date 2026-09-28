@@ -63,7 +63,7 @@ nonisolated enum Exporter {
     }
 
     static func outputSize(_ doc: EditDocument, size: ExportSize) -> CGSize {
-        let out = CropGeometry(crop: doc.crop, sourceSize: doc.source.size).outputSize
+        let out = doc.source.size
         guard let limit = size.maxLongEdge, max(out.width, out.height) > limit else { return out }
         let s = limit / max(out.width, out.height)
         return CGSize(width: round(out.width * s), height: round(out.height * s))
@@ -82,7 +82,7 @@ nonisolated enum Exporter {
 
         guard let full = session.fullResolution() else { throw Failure.original }
         var source = full
-        let fullOut = CropGeometry(crop: document.crop, sourceSize: document.source.size).outputSize
+        let fullOut = document.source.size
         let target = outputSize(document, size: size)
         if target.width < fullOut.width {
             let s = target.width / fullOut.width

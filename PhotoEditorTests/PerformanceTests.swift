@@ -31,12 +31,9 @@ final class PerformanceTests: XCTestCase {
 
     private func document() -> EditDocument {
         var doc = EditDocument(source: SourceInfo(filename: "perf-48mp.heic", pixelWidth: 8064, pixelHeight: 6048))
-        doc.adjust[.exposure] = 20
-        doc.adjust[.contrast] = 15
-        doc.adjust[.warmth] = 20
-        doc.adjust[.vignette] = 30
-        doc.filter = FilterRef(id: "film", intensity: 0.8)
-        doc.layers = [Layer(content: .text(TextSpec(string: "Benchmark")))]
+        doc.smoothSkin = 50
+        doc.beauty[.whiten] = 40
+        doc.reshape.manual = [ManualWarp(kind: .grow, center: CGPoint(x: 0.5, y: 0.5), radius: 0.1)]
         return doc
     }
 
@@ -60,7 +57,7 @@ final class PerformanceTests: XCTestCase {
         var frames: [Double] = []
         for i in 0..<20 {
             var d = doc
-            d.adjust[.exposure] = Double(i)
+            d.beauty[.whiten] = Double(i)
             let img = RenderPipeline(session: session, document: d, source: fitted).image()
             let ms = time("frame \(i)") {
                 let buffer = queue.makeCommandBuffer()!
