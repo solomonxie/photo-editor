@@ -29,7 +29,7 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
 |---|---|---|
 | Home | page (root) | [uiux/home.md](uiux/home.md) |
 | Editor | full-screen page, dark | [uiux/editor.md](uiux/editor.md) |
-| Tool panels (Cutout, Beauty, Reshape) | in-place panel above the tool bar | [uiux/tools.md](uiux/tools.md) |
+| Tool panels (Cutout, Beauty, Reshape, Hair) | in-place panel above the tool bar | [uiux/tools.md](uiux/tools.md) |
 | AI (Magic Erase, Fill, Restyle) | in-place panel + run state | [uiux/ai.md](uiux/ai.md) |
 | Layers | half sheet | [uiux/editor.md](uiux/editor.md#layers-sheet) |
 | Export | half sheet | [uiux/editor.md](uiux/editor.md#export-sheet) |
