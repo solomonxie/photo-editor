@@ -32,6 +32,33 @@ nonisolated struct BodyAnalysis: Sendable {
     }
 }
 
+nonisolated extension BodyAnalysis.Body {
+    private var torso: [CGPoint] { [leftShoulder, rightShoulder, leftHip, rightHip] }
+
+    /// Torso centre, top-left normalized.
+    var anchor: CGPoint {
+        CGPoint(x: torso.map(\.x).reduce(0, +) / 4, y: torso.map(\.y).reduce(0, +) / 4)
+    }
+
+    /// Torso box, top-left normalized, padded for display and hit-testing.
+    var frame: CGRect {
+        let xs = torso.map(\.x), ys = torso.map(\.y)
+        let r = CGRect(x: xs.min()!, y: ys.min()!, width: xs.max()! - xs.min()!, height: ys.max()! - ys.min()!)
+        return r.insetBy(dx: -max(0.02, r.width * 0.25), dy: -max(0.02, r.height * 0.1))
+    }
+
+    /// How far a saved anchor may drift and still count as this person.
+    var reach: Double { max(frame.width, frame.height) * 0.5 }
+}
+
+nonisolated extension FaceAnalysis.Face {
+    /// Face centre, top-left normalized.
+    var anchor: CGPoint { CGPoint(x: bounds.midX, y: 1 - bounds.midY) }
+    /// Face box, top-left normalized.
+    var frame: CGRect { CGRect(x: bounds.minX, y: 1 - bounds.maxY, width: bounds.width, height: bounds.height) }
+    var reach: Double { max(bounds.width, bounds.height) * 0.6 }
+}
+
 nonisolated extension RenderPipeline {
     var bodies: BodyAnalysis {
         session.cached("bodies") { BodyAnalysis.run(on: session.proxyCGImage) }
@@ -47,11 +74,13 @@ nonisolated enum ReshapeBuilder {
     static func build(_ spec: ReshapeSpec, faces: FaceAnalysis, bodies: BodyAnalysis, sourceSize: CGSize) -> WarpField {
         let aspect = sourceSize.width / sourceSize.height
         var field = WarpField(aspect: aspect)
-        if !spec.face.isEmpty {
-            for face in faces.faces { applyFace(face, spec.face, aspect: aspect, into: &field) }
+        for face in faces.faces where !spec.faces.isEmpty {
+            let v = ReshapeSpec.values(spec.faces, at: face.anchor, within: face.reach)
+            if !v.isEmpty { applyFace(face, v, aspect: aspect, into: &field) }
         }
-        if !spec.body.isEmpty {
-            for body in bodies.bodies { applyBody(body, spec.body, aspect: aspect, into: &field) }
+        for body in bodies.bodies where !spec.bodies.isEmpty {
+            let v = ReshapeSpec.values(spec.bodies, at: body.anchor, within: body.reach)
+            if !v.isEmpty { applyBody(body, v, aspect: aspect, into: &field) }
         }
         for m in spec.manual {
             switch m.kind {

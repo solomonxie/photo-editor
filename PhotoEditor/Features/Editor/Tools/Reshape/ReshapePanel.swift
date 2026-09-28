@@ -38,86 +38,92 @@ extension BodyShapeKey: Identifiable {
 
 struct ReshapePanel: View {
     let model: EditorModel
-    @State private var mode: Mode = Self.initialMode
     @State private var faceKey: FaceShapeKey? = .slim
     @State private var bodyKey: BodyShapeKey? = .waist
-    @State private var counts: (faces: Int, bodies: Int)?
     @AppStorage(BrushOverlay.brushSizeKey) private var brushSize: Double = 28
 
-    private static var initialMode: Mode {
-        #if DEBUG
-        if let m = DebugLaunch.value("-mode").flatMap(Mode.init(rawValue:)) { return m }
-        #endif
-        return .face
-    }
-
-    enum Mode: String, CaseIterable { case face, body, manual }
-
     var body: some View {
+        @Bindable var model = model
         ToolPanel {
-            switch mode {
+            switch model.reshapeMode {
             case .face: faceControls
             case .body: bodyControls
             case .manual: manualControls
             }
-            Segmented(options: Mode.allCases, selection: $mode) { $0.rawValue.capitalized }
+            Segmented(options: ReshapeMode.allCases, selection: $model.reshapeMode) { $0.rawValue.capitalized }
                 .padding(.horizontal, 50)
         }
-        .onChange(of: mode, initial: true) { _, m in
+        .onChange(of: model.reshapeMode, initial: true) { _, m in
             model.selectedLayerID = nil
             model.brushTarget = m == .manual ? .reshape(model.reshapeKind) : nil
         }
         .onDisappear { model.brushTarget = nil }
         .task {
-            let session = model.session
-            counts = await Self.analyze(session)
-            if counts?.faces == 0, (counts?.bodies ?? 0) > 0 { mode = .body }
+            #if DEBUG
+            if let m = DebugLaunch.value("-mode").flatMap(ReshapeMode.init(rawValue:)) { model.reshapeMode = m }
+            #endif
+            guard model.reshapeTargets == nil else { return }
+            let targets = await Self.analyze(model.session)
+            model.reshapeTargets = targets
+            if targets.faces.isEmpty, !targets.bodies.isEmpty, model.reshapeMode == .face { model.reshapeMode = .body }
         }
     }
 
     @concurrent
-    private static func analyze(_ session: RenderSession) async -> (Int, Int) {
-        let f = session.cached("faces") { FaceAnalysis.run(on: session.proxyCGImage) }.faces.count
-        let b = session.cached("bodies") { BodyAnalysis.run(on: session.proxyCGImage) }.bodies.count
-        return (f, b)
+    private static func analyze(_ session: RenderSession) async -> (faces: [ReshapeTarget], bodies: [ReshapeTarget]) {
+        let faces = session.cached("faces") { FaceAnalysis.run(on: session.proxyCGImage) }.faces
+            .map { ReshapeTarget(anchor: $0.anchor, frame: $0.frame, reach: $0.reach) }
+        let bodies = session.cached("bodies") { BodyAnalysis.run(on: session.proxyCGImage) }.bodies
+            .map { ReshapeTarget(anchor: $0.anchor, frame: $0.frame, reach: $0.reach) }
+        let bySize: (ReshapeTarget, ReshapeTarget) -> Bool = { $0.frame.width * $0.frame.height > $1.frame.width * $1.frame.height }
+        return (faces.sorted(by: bySize), bodies.sorted(by: bySize))
     }
 
     @ViewBuilder
     private var faceControls: some View {
-        if counts == nil {
+        if model.reshapeTargets == nil {
             ProgressView().frame(height: 60)
-        } else if counts?.faces == 0 {
-            unavailable("No faces found. Try Manual to reshape by hand.")
-        } else {
+        } else if let person = model.selectedPerson {
+            let values = ReshapeSpec.values(model.document.reshape.faces, at: person.anchor, within: person.reach)
             if let key = faceKey {
-                ValueSlider(title: key.title, value: Binding(
-                    get: { model.document.reshape.face[key] ?? 0 },
-                    set: { v in model.live { $0.reshape.face[key] = v == 0 ? nil : v } }
+                ValueSlider(title: key.title + whoSuffix, value: Binding(
+                    get: { values[key] ?? 0 },
+                    set: { v in model.live { ReshapeSpec.set(&$0.reshape.faces, anchor: person.anchor, key: key, value: v, reach: person.reach) } }
                 ), onBegin: model.beginGesture, onEnd: model.endGesture)
                 .padding(.horizontal, 20)
             }
             ChipRow(items: FaceShapeKey.allCases, selection: $faceKey, title: \.title,
-                    changed: { model.document.reshape.face[$0] != nil })
+                    changed: { values[$0] != nil })
+        } else {
+            unavailable("No faces found. Try Manual to reshape by hand.")
         }
     }
 
     @ViewBuilder
     private var bodyControls: some View {
-        if counts == nil {
+        if model.reshapeTargets == nil {
             ProgressView().frame(height: 60)
-        } else if counts?.bodies == 0 {
-            unavailable("No full body found. Try Manual to reshape by hand.")
-        } else {
+        } else if let person = model.selectedPerson {
+            let values = ReshapeSpec.values(model.document.reshape.bodies, at: person.anchor, within: person.reach)
             if let key = bodyKey {
-                ValueSlider(title: "\(key.title) · + \(key.positiveMeaning)", value: Binding(
-                    get: { model.document.reshape.body[key] ?? 0 },
-                    set: { v in model.live { $0.reshape.body[key] = v == 0 ? nil : v } }
+                ValueSlider(title: "\(key.title) · + \(key.positiveMeaning)" + whoSuffix, value: Binding(
+                    get: { values[key] ?? 0 },
+                    set: { v in model.live { ReshapeSpec.set(&$0.reshape.bodies, anchor: person.anchor, key: key, value: v, reach: person.reach) } }
                 ), onBegin: model.beginGesture, onEnd: model.endGesture)
                 .padding(.horizontal, 20)
             }
             ChipRow(items: BodyShapeKey.allCases, selection: $bodyKey, title: \.title,
-                    changed: { model.document.reshape.body[$0] != nil })
+                    changed: { values[$0] != nil })
+        } else {
+            unavailable("No full body found. Try Manual to reshape by hand.")
         }
+    }
+
+    /// "· 2 of 3" when there's more than one person to choose from.
+    private var whoSuffix: String {
+        let n = model.reshapePeople.count
+        guard n > 1 else { return "" }
+        return " · \(model.selectedIndex + 1) of \(n)"
     }
 
     private var manualControls: some View {
@@ -205,5 +211,30 @@ struct ReshapeBrushOverlay: View {
                               vector: CGVector(dx: src.x - srcPrev.x, dy: src.y - srcPrev.y),
                               radius: radius)
         model.live { $0.reshape.manual.append(warp) }
+    }
+}
+
+/// Outlines the people Reshape can target when there's a choice; tap one to pick it.
+struct ReshapeTargetsOverlay: View {
+    let model: EditorModel
+
+    var body: some View {
+        let people = model.reshapePeople
+        let selected = model.selectedIndex
+        ZStack {
+            if people.count > 1 {
+                ForEach(people.indices, id: \.self) { i in
+                    let a = model.viewport.viewPoint(people[i].frame.origin)
+                    let b = model.viewport.viewPoint(CGPoint(x: people[i].frame.maxX, y: people[i].frame.maxY))
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(i == selected ? Color.accentColor : .white.opacity(0.7),
+                                style: StrokeStyle(lineWidth: i == selected ? 2.5 : 1.5, dash: i == selected ? [] : [5, 4]))
+                        .shadow(color: .black.opacity(0.5), radius: 1)
+                        .frame(width: b.x - a.x, height: b.y - a.y)
+                        .position(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2)
+                }
+            }
+        }
+        .allowsHitTesting(false)
     }
 }

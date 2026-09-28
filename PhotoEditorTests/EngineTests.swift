@@ -119,11 +119,30 @@ final class WarpTests: XCTestCase {
 
     func testReshapeDocumentRoundTrips() throws {
         var doc = EditDocument(source: SourceInfo(filename: "o.jpg", pixelWidth: 10, pixelHeight: 10))
-        doc.reshape.face[.eyes] = 30
-        doc.reshape.body[.waist] = 40
+        doc.reshape.faces = [PersonShape(anchor: CGPoint(x: 0.3, y: 0.4), values: [.eyes: 30])]
+        doc.reshape.bodies = [PersonShape(values: [.waist: 40])]
         doc.reshape.manual = [ManualWarp(kind: .push, center: CGPoint(x: 0.5, y: 0.5), vector: CGVector(dx: 0.01, dy: 0), radius: 0.1)]
         doc.redEye = true
         XCTAssertEqual(try JSONDecoder().decode(EditDocument.self, from: JSONEncoder().encode(doc)), doc)
+    }
+}
+
+final class ReshapeSpecTests: XCTestCase {
+    func testLegacySlidersApplyToEveryone() throws {
+        let json = #"{"face":{"slim":20},"body":{"waist":10}}"#
+        let spec = try JSONDecoder().decode(ReshapeSpec.self, from: Data(json.utf8))
+        XCTAssertEqual(ReshapeSpec.values(spec.faces, at: CGPoint(x: 0.9, y: 0.9), within: 0.1), [.slim: 20])
+        XCTAssertEqual(ReshapeSpec.values(spec.bodies, at: .zero, within: 0.1), [.waist: 10])
+    }
+
+    func testSlidersStickToTheChosenFace() {
+        var faces: [PersonShape<FaceShapeKey>] = []
+        let left = CGPoint(x: 0.25, y: 0.3), right = CGPoint(x: 0.75, y: 0.3)
+        ReshapeSpec.set(&faces, anchor: left, key: .slim, value: 40, reach: 0.1)
+        XCTAssertEqual(ReshapeSpec.values(faces, at: CGPoint(x: 0.26, y: 0.31), within: 0.1), [.slim: 40])
+        XCTAssertEqual(ReshapeSpec.values(faces, at: right, within: 0.1), [:])
+        ReshapeSpec.set(&faces, anchor: left, key: .slim, value: 0, reach: 0.1)
+        XCTAssertTrue(faces.isEmpty)
     }
 }
 
