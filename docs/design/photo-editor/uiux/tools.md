@@ -50,7 +50,8 @@ red eye                     Fix red eyes                              ─●
 On-device warp guided by Vision face and body landmarks.
 
 ```
- Waist · + slimmer                                    +40   ← caption says what + does
+ Waist · + slimmer · 2 of 3                           +40   ← caption says what + does,
+                                                               and whose
  ├──────────────────────────────────●──────────────────┤
  WAIST•  Hips  Chest  Legs  Shoulders  Arms              ›
  [ Face | BODY | Manual ]
@@ -64,6 +65,9 @@ manual     [ PUSH | Grow | Shrink ]  ( Clear )
 no face    "No faces found. Try Manual to reshape by hand."
 no body    "No full body found. Try Manual to reshape by hand."
            → opens on Body when there's a body but no face
+several    each face / body outlined (dashed); the chosen one solid accent.
+people     Tap one to choose it; sliders apply only to that person.
+           Largest is chosen first. Beauty looks still apply to every face.
 ```
 
 ## Copy
