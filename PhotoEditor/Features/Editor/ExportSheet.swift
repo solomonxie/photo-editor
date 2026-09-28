@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SaveSheet: View {
+struct ExportSheet: View {
     let model: EditorModel
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppSettings.exportFormatKey) private var defaultFormat: ExportFormat = .heic
@@ -24,11 +24,11 @@ struct SaveSheet: View {
         Settings(format: format, size: size, quality: quality, keepLocation: keepLocation)
     }
 
-    enum Action { case save, share }
+    enum Action { case photos, share }
 
     var body: some View {
         VStack(spacing: 18) {
-            Text("Save")
+            Text("Export")
                 .font(.headline)
                 .padding(.top, 22)
 
@@ -79,7 +79,7 @@ struct SaveSheet: View {
             if working != nil {
                 HStack(spacing: 12) {
                     ProgressView()
-                    Text(working == .save ? "Exporting…" : "Preparing…")
+                    Text(working == .photos ? "Exporting…" : "Preparing…")
                     Button("Cancel") {
                         task?.cancel()
                         working = nil
@@ -89,9 +89,9 @@ struct SaveSheet: View {
                 .frame(height: 50)
             } else {
                 Button {
-                    run(.save)
+                    run(.photos)
                 } label: {
-                    Text("Save to Photos")
+                    Text("Export to Photos")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
@@ -148,17 +148,15 @@ struct SaveSheet: View {
                 }
                 try Task.checkCancellation()
                 switch action {
-                case .save:
+                case .photos:
                     try await PhotoSaver.save(data)
-                    await model.commit()
                     working = nil
                     dismiss()
-                    model.showToast("Saved to Photos")
+                    model.showToast("Exported to Photos")
                 case .share:
                     let url = FileManager.default.temporaryDirectory
                         .appendingPathComponent("Photo Editor \(Self.stamp()).\(s.format.utType.preferredFilenameExtension ?? "jpg")")
                     try data.write(to: url)
-                    await model.commit()
                     working = nil
                     shareURL = url
                 }
@@ -174,7 +172,7 @@ struct SaveSheet: View {
         }
     }
 
-    /// Encodes with the current settings so the size is known, and Save can reuse the bytes.
+    /// Encodes with the current settings so the size is known, and Export can reuse the bytes.
     private func estimate() async {
         try? await Task.sleep(for: .milliseconds(250))
         guard !Task.isCancelled else { return }

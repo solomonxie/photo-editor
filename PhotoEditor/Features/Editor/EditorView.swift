@@ -5,7 +5,7 @@ struct EditorView: View {
     let onClose: () -> Void
 
     @State private var showLayers = false
-    @State private var showSave = false
+    @State private var showExport = false
     @State private var confirmDiscard = false
 
     var body: some View {
@@ -30,8 +30,8 @@ struct EditorView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showSave) {
-            SaveSheet(model: model)
+        .sheet(isPresented: $showExport) {
+            ExportSheet(model: model)
                 .presentationDetents([.height(430)])
                 .presentationDragIndicator(.visible)
         }
@@ -48,7 +48,7 @@ struct EditorView: View {
             }
             if DebugLaunch.has("-close") { confirmDiscard = model.hasUnsavedChanges }
             switch DebugLaunch.sheet {
-            case "save": showSave = true
+            case "export": showExport = true
             case "layers": showLayers = true
             default: break
             }
@@ -69,7 +69,12 @@ struct EditorView: View {
             .accessibilityLabel("Close")
             .confirmationDialog("Discard changes?", isPresented: $confirmDiscard, titleVisibility: .visible) {
                 Button("Discard Changes", role: .destructive, action: onClose)
-                Button("Save…") { showSave = true }
+                Button("Save") {
+                    Task {
+                        await model.commit()
+                        onClose()
+                    }
+                }
                 Button("Keep Editing", role: .cancel) {}
             } message: {
                 Text("Your edits haven't been saved.")
@@ -116,7 +121,17 @@ struct EditorView: View {
             }
             .accessibilityLabel("Layers")
 
-            Button { showSave = true } label: {
+            Button { showExport = true } label: {
+                Image(systemName: "square.and.arrow.up").frame(width: 40, height: 40)
+            }
+            .accessibilityLabel("Export")
+
+            Button {
+                Task {
+                    await model.commit()
+                    model.showToast("Saved")
+                }
+            } label: {
                 Text("Save")
                     .font(.subheadline.weight(.semibold))
                     .padding(.horizontal, 16)
@@ -124,6 +139,8 @@ struct EditorView: View {
                     .background(Color.accentColor, in: Capsule())
                     .foregroundStyle(.white)
             }
+            .disabled(!model.hasUnsavedChanges)
+            .opacity(model.hasUnsavedChanges ? 1 : 0.45)
             .padding(.leading, 6)
         }
         .font(.system(size: 17, weight: .medium))

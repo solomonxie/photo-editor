@@ -18,7 +18,7 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
                                         │
              ┌────────────┬─────────────┼─────────────┬──────────┐
              ▼            ▼             ▼             ▼          ▼
-        tool panels   Layers (sheet)  Save (sheet)  AI (sheet)  [share sheet]
+        tool panels   Layers (sheet) Export (sheet) AI (sheet)  [share sheet]
         (in place)                                    │
                                                       └─no key─▶ Add Key (sheet)
 
@@ -32,7 +32,7 @@ is 60 cols throughout. Glyphs follow the `uiux` skill's `notation.md`.
 | Tool panels (Cutout, Beauty, Reshape) | in-place panel above the tool bar | [uiux/tools.md](uiux/tools.md) |
 | AI (Magic Erase, Fill, Restyle) | in-place panel + run state | [uiux/ai.md](uiux/ai.md) |
 | Layers | half sheet | [uiux/editor.md](uiux/editor.md#layers-sheet) |
-| Save | half sheet | [uiux/editor.md](uiux/editor.md#save-sheet) |
+| Export | half sheet | [uiux/editor.md](uiux/editor.md#export-sheet) |
 | Beauty, Makeup, Reshape (v1.1) | in-place panels | [uiux/beauty.md](uiux/beauty.md) |
 | Draw, Mosaic, Background, Frame, ID Photo | in-place panels | [uiux/creative.md](uiux/creative.md) |
 | Home actions, Collage, Batch | page / pushed page | [uiux/collage-batch.md](uiux/collage-batch.md) |
@@ -52,8 +52,11 @@ First edit
                           │                    │
                           └─cancel─▶ Home      └─fail─▶ Home + ⌐ Couldn't open photo ¬
 
-Save
- Editor ─Save─▶ Save sheet ─Save to Photos─▶ ⟳ Exporting 62% ─▶ ⌐ Saved to Photos ¬
+Save (in app)
+ Editor ─Save─▶ edit stored in Recent ─▶ ⌐ Saved ¬        (Save dimmed when nothing changed)
+
+Export
+ Editor ─⇪─▶ Export sheet ─Export to Photos─▶ ⟳ Exporting 62% ─▶ ⌐ Exported to Photos ¬
                     │                              │
                     ├─Share…─▶ [share sheet]       └─no add permission─▶ alert ─▶ [iOS Settings]
                     └─drag ▼─▶ Editor
@@ -71,13 +74,14 @@ Generative AI
 Leave
  Editor ─✕─▶ Home                        (no unsaved edits)
         └─✕─▶ "Discard changes?" ─┬─ Discard ─▶ Home (a never-saved new photo leaves Recent)
-                                 ├─ Save… ─▶ Save sheet
+                                 ├─ Save ─▶ stored in Recent ─▶ Home
                                  └─ Keep Editing
 ```
 
 ## Principles applied
 
-- **Save is explicit.** Edits persist only on Save or Share; leaving with unsaved edits asks first.
+- **Save is explicit.** Save keeps the edit in the app; only Export writes to the photo library.
+  Export and Share don't save the edit; leaving with unsaved edits asks first.
 - **The photo is the UI.** Chrome is dark and minimal. Panels never cover the canvas: the canvas shrinks.
 - **Hold to compare.** Press and hold the canvas (or the Compare button) to show the original.
 - **Degrade, never error** (`byo-ai-keys.md`). With no key, only the three generative
