@@ -40,7 +40,8 @@ No capabilities are needed (no iCloud, no push, no App Groups).
   - Retouch → Smooth skin on a face, and heal a spot.
   - Reshape → Body on a full-length photo.
   - Cutout → Blur, then Copy as Sticker.
-  - Save to Photos (grant add-only access). Open Photos and check the result.
+  - Save: the edit appears in Home's Recent.
+  - ⇪ → Export to Photos (grant add-only access). Open Photos and check the result.
   - Reopen the edit from Home: every slider is still adjustable.
   - Home → ⇲ Compress: pick a few photos and a video, compress, check the copies in Photos, delete originals.
 - [ ] `make test` → unit tests and the 48 MP benchmark on the device (numbers print as `PERF …`).
@@ -196,7 +197,7 @@ CUTOUT
 • Lift a subject out as a sticker; move, pinch, rotate, reorder and fade it as a layer
 
 NOTHING IS FINAL
-Every edit stays adjustable. Save a photo, come back next week, and every slider is where you left it. Saving always adds a new photo — your original is never touched.
+Every edit stays adjustable. Save keeps the edit in the app — come back next week and every slider is where you left it. Export adds a new photo to your library; your original is never touched.
 
 FAST
 Built on Apple's Metal and Core Image. Sliders update every frame, and a 48-megapixel photo exports in about a second on an iPhone 14.
@@ -205,7 +206,7 @@ OPTIONAL AI, ON YOUR OWN KEY
 Magic Erase, Fill ("fuller hair", "a hat") and Restyle use your own OpenAI or Google Gemini API key. The key stays in this iPhone's Keychain, the provider bills you directly, and only the photo and prompt you run are sent. Skip it and everything else still works.
 
 PRIVATE
-Photos are picked with the system picker, and saving needs add-only access. Only the optional Compress tool asks for library access, to shrink the items you choose. No analytics, no ads, no tracking.
+Photos are picked with the system picker, and exporting needs add-only access. Only the optional Compress tool asks for library access, to shrink the items you choose. No analytics, no ads, no tracking.
 ```
 
 Keywords (99/100 — "photo" and "editor" are omitted, the name already indexes them):
@@ -219,7 +220,7 @@ App Review Notes:
 ```
 No account or login is needed. Tap Open Photo, pick any photo, and every tool in the bottom bar works immediately and offline.
 
-Photos access: photos are chosen with the system PHPicker, which needs no permission. Saving asks for add-only access (NSPhotoLibraryAddUsageDescription). The separate Compress tool (Home → ⇲) asks for read/write access (NSPhotoLibraryUsageDescription) only when used: it re-encodes the photos and videos the user picks into smaller copies, and deletes originals only after the user taps Delete and confirms the iOS prompt.
+Photos access: photos are chosen with the system PHPicker, which needs no permission. Export to Photos asks for add-only access (NSPhotoLibraryAddUsageDescription). The separate Compress tool (Home → ⇲) asks for read/write access (NSPhotoLibraryUsageDescription) only when used: it re-encodes the photos and videos the user picks into smaller copies, and deletes originals only after the user taps Delete and confirms the iOS prompt.
 
 Face and body tools (Retouch, Reshape) use Apple's Vision framework on the device to place edits on the user's own photo. Landmarks are never stored or transmitted.
 

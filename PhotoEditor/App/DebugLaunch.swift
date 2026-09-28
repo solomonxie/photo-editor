@@ -6,7 +6,7 @@ import UIKit
 /// Launch arguments for reviewing screens on a device without tapping:
 ///   -demo <file in Documents>|synthetic   open that photo in the Editor
 ///   -tool <retouch|reshape|…>             initial tool
-///   -sheet <save|layers>                  present a sheet on open
+///   -sheet <export|layers>                present a sheet on open
 ///   -settings                             push Settings from Home
 ///   -compress                             push Compress from Home
 ///   -patch '<json>'                       merge into the document on open (not saved)
