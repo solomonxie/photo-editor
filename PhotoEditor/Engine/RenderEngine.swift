@@ -26,7 +26,7 @@ nonisolated enum RenderEngine {
 
 /// What to produce from a document.
 nonisolated struct RenderOptions {
-    enum Mode { case edited, original, straightenOnly }
+    enum Mode { case edited, original }
     var mode: Mode = .edited
     var includeLayers = true
     var highlightSubjects = false
@@ -43,7 +43,6 @@ nonisolated struct RenderPipeline {
 
     var sourceSize: CGSize { source.extent.size }
     var scale: CGFloat { sourceSize.width / document.source.size.width }
-    var geometry: CropGeometry { CropGeometry(crop: document.crop, sourceSize: sourceSize) }
 
     func image(_ options: RenderOptions = RenderOptions()) -> CIImage {
         let state = RenderEngine.signposter.beginInterval("graph")
@@ -56,16 +55,7 @@ nonisolated struct RenderPipeline {
         img = applyHeal(img)
         img = applyRedEye(img)
         img = applyWarp(img)
-
-        let preGeometry = img
-        if options.mode == .straightenOnly {
-            return geometry.applyStraighten(img)
-        }
-        img = geometry.apply(img)
-
-        img = applyAdjust(img)
-        img = applyFilter(img)
-        img = applySmoothSkin(img, unedited: preGeometry)
+        img = applySmoothSkin(img)
         img = applyBeauty(img)
         img = applyCutout(img)
         if options.highlightSubjects, document.cutout?.background == .keep {
@@ -74,12 +64,7 @@ nonisolated struct RenderPipeline {
         if options.includeLayers {
             img = applyLayers(img)
         }
-        return img.cropped(to: CGRect(origin: .zero, size: geometry.outputSize))
-    }
-
-    /// Renders a mask that lives in source space into output space.
-    func toOutput(_ sourceSpaceMask: CIImage) -> CIImage {
-        geometry.apply(sourceSpaceMask)
+        return img.cropped(to: CGRect(origin: .zero, size: sourceSize))
     }
 
     static func blend(_ base: CIImage, _ top: CIImage, mask: CIImage) -> CIImage {

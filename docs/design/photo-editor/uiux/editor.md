@@ -15,12 +15,10 @@ are kept only when saved or shared; ✕ with unsaved edits asks "Discard changes
 │                                                        │ ← press-and-hold =
 │                                                        │   show original
 └────────────────────────────────────────────────────────┘
- Exposure                                             +24  ← tool panel
- ├───────────────────────────────●─────────────────────┤     (tools.md)
- ( Auto )  EXPOSURE  Brilliance  Contrast  Highlights  ›
+  2 of 3 subjects                                          ← tool panel
+ [ Keep | REMOVE | Blur | Colour ]                            (tools.md)
 ────────────────────────────────────────────────────────
- ADJUST Filters Crop Retouch Reshape Text Stickers Cutout AI ← tool bar;
-                                                              scrolls horizontally
+ CUTOUT Beauty Reshape AI                                 ← tool bar
 ```
 
 - `↶ ↷` = SF `arrow.uturn.backward` / `.forward`. They're disabled (`·`) at the ends of the history.
@@ -64,10 +62,6 @@ Half sheet. Top of the list = front.
 ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
                          Layers                    Done
 ╭──────────────────────────────────────────────────────╮
-│ ≡  [Aa]  Summer in Kyoto, day one of…     👁   ⋯     │ ← text truncates
-├──────────────────────────────────────────────────────┤
-│ ≡  [🌴]  Sticker                          👁   ⋯     │
-├──────────────────────────────────────────────────────┤
 │ ≡  [▣ ]  Subject cutout                   👁   ⋯     │
 ├──────────────────────────────────────────────────────┤
 │    [▣ ]  Photo                             🔒        │ ← base, fixed at bottom
@@ -86,7 +80,7 @@ Half sheet. Top of the list = front.
    │ Delete         ! │
    └──────────────────┘
 
-one layer   only "Photo" row + hint "Add text, stickers or a cutout to get layers."
+one layer   only "Photo" row + hint "Copy a cutout as a sticker to get layers."
 ```
 
 ## Save sheet
@@ -137,7 +131,7 @@ denied     ┌──────────────────────
 |---|---|
 | `editor.compare.pill` | Original |
 | `editor.layers.title` | Layers |
-| `editor.layers.empty` | Add text, stickers or a cutout to get layers. |
+| `editor.layers.empty` | Copy a cutout as a sticker to get layers. |
 | `editor.save.title` | Save |
 | `editor.save.photos` | Save to Photos |
 | `editor.save.share` | Share… |

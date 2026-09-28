@@ -25,11 +25,6 @@ struct EditorView: View {
             }
         }
         .animation(.snappy, value: model.toast)
-        .overlay {
-            if let id = model.editingTextLayerID {
-                TextEditOverlay(model: model, layerID: id)
-            }
-        }
         .sheet(isPresented: $showLayers) {
             LayersSheet(model: model)
                 .presentationDetents([.medium, .large])
@@ -177,13 +172,8 @@ struct EditorView: View {
         if let tool = model.activeTool {
             Group {
                 switch tool {
-                case .adjust: AdjustPanel(model: model)
-                case .filters: FiltersPanel(model: model)
-                case .crop: CropPanel(model: model)
                 case .retouch: RetouchPanel(model: model)
                 case .reshape: ReshapePanel(model: model)
-                case .text: TextPanel(model: model)
-                case .stickers: StickersPanel(model: model)
                 case .cutout: CutoutPanel(model: model)
                 case .ai: AIPanel(model: model)
                 }

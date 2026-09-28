@@ -15,7 +15,7 @@ struct LayersSheet: View {
                     baseRow
                 } footer: {
                     if model.document.layers.isEmpty {
-                        Text("Add text, stickers or a cutout to get layers.")
+                        Text("Copy a cutout as a sticker to get layers.")
                     }
                 }
                 if let layer = model.selectedLayer {
@@ -122,13 +122,7 @@ struct LayerThumb: View {
     let content: Layer.Content
 
     var body: some View {
-        Group {
-            switch content {
-            case .text: Image(systemName: "textformat").font(.system(size: 15, weight: .semibold))
-            case .emoji(let e): Text(e).font(.system(size: 22))
-            case .image: Image(systemName: "person.crop.rectangle")
-            }
-        }
+        Image(systemName: "person.crop.rectangle")
         .frame(width: 36, height: 36)
         .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
     }
