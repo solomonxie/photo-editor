@@ -63,20 +63,9 @@ struct ReshapePanel: View {
             if let m = DebugLaunch.value("-mode").flatMap(ReshapeMode.init(rawValue:)) { model.reshapeMode = m }
             #endif
             guard model.reshapeTargets == nil else { return }
-            let targets = await Self.analyze(model.session)
-            model.reshapeTargets = targets
-            if targets.faces.isEmpty, !targets.bodies.isEmpty, model.reshapeMode == .face { model.reshapeMode = .body }
+            await model.analyzePeople()
+            if let t = model.reshapeTargets, t.faces.isEmpty, !t.bodies.isEmpty, model.reshapeMode == .face { model.reshapeMode = .body }
         }
-    }
-
-    @concurrent
-    private static func analyze(_ session: RenderSession) async -> (faces: [ReshapeTarget], bodies: [ReshapeTarget]) {
-        let faces = session.cached("faces") { FaceAnalysis.run(on: session.proxyCGImage) }.faces
-            .map { ReshapeTarget(anchor: $0.anchor, frame: $0.frame, reach: $0.reach) }
-        let bodies = session.cached("bodies") { BodyAnalysis.run(on: session.proxyCGImage) }.bodies
-            .map { ReshapeTarget(anchor: $0.anchor, frame: $0.frame, reach: $0.reach) }
-        let bySize: (ReshapeTarget, ReshapeTarget) -> Bool = { $0.frame.width * $0.frame.height > $1.frame.width * $1.frame.height }
-        return (faces.sorted(by: bySize), bodies.sorted(by: bySize))
     }
 
     @ViewBuilder
@@ -214,7 +203,7 @@ struct ReshapeBrushOverlay: View {
     }
 }
 
-/// Outlines the people Reshape can target when there's a choice; tap one to pick it.
+/// Outlines the people Reshape or Hair can target when there's a choice; tap one to pick it.
 struct ReshapeTargetsOverlay: View {
     let model: EditorModel
 

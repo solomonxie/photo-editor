@@ -10,6 +10,8 @@ adjustments or text: the Photos app already does those. Only the edits it can't.
   - Face: slim, chin, eyes, nose, forehead.
   - Body: waist, hips, chest, legs, shoulders, arms.
   - Manual push, grow and shrink brush.
+- **Hair, on your AI key:** add hair, thicken, bangs, beards, mustache and hair colour,
+  masked automatically on the face you tap.
 - **AI, on your own key (OpenAI or Gemini):** Magic Erase, Fill (e.g. "fuller hair")
   and Restyle. The key stays in this iPhone's Keychain, and your vendor bills you.
 - **Save vs Export:** Save keeps the edit in the app, still adjustable. Export writes a new

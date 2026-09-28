@@ -70,6 +70,25 @@ people     Tap one to choose it; sliders apply only to that person.
            Largest is chosen first. Beauty looks still apply to every face.
 ```
 
+## Hair
+
+AI Fill on the user's key. The mask is placed from the chosen face's landmarks, so there's no painting.
+
+```
+ ( ADD HAIR )  Thicken  Bangs                           ← chips per mode
+ Tap a face to choose who.                  [[ Apply ]]
+ [ HAIR | Beard | Colour ]
+```
+
+```
+hair       Add Hair (crown + hairline) · Thicken (+ sides) · Bangs
+beard      Stubble · Short Beard · Full Beard · Goatee · Mustache
+colour     Black · Dark Brown · Chestnut · Blonde · Ash · Silver · Red · Rose Pink · Blue · Purple
+canvas     red = area that changes; faces outlined when there's more than one
+no key     "Hair and beard use your own AI key."  [[ Add AI Key ]]
+result     a patch like AI Fill: undoable, toast with Undo
+```
+
 ## Copy
 
 | Key | String |

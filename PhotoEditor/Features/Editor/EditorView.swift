@@ -191,6 +191,7 @@ struct EditorView: View {
                 switch tool {
                 case .retouch: RetouchPanel(model: model)
                 case .reshape: ReshapePanel(model: model)
+                case .hair: HairPanel(model: model)
                 case .cutout: CutoutPanel(model: model)
                 case .ai: AIPanel(model: model)
                 }

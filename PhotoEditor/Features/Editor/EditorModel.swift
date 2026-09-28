@@ -3,7 +3,7 @@ import Observation
 import SwiftUI
 
 enum EditorTool: String, CaseIterable, Identifiable {
-    case cutout, retouch, reshape, ai
+    case cutout, retouch, reshape, hair, ai
 
     var id: String { rawValue }
 
@@ -11,6 +11,7 @@ enum EditorTool: String, CaseIterable, Identifiable {
         switch self {
         case .retouch: "Beauty"
         case .reshape: "Reshape"
+        case .hair: "Hair"
         case .cutout: "Cutout"
         case .ai: "AI"
         }
@@ -20,6 +21,7 @@ enum EditorTool: String, CaseIterable, Identifiable {
         switch self {
         case .retouch: "wand.and.rays"
         case .reshape: "figure.arms.open"
+        case .hair: "mustache"
         case .cutout: "person.crop.rectangle"
         case .ai: "sparkles"
         }
@@ -28,7 +30,7 @@ enum EditorTool: String, CaseIterable, Identifiable {
 
 enum ReshapeMode: String, CaseIterable { case face, body, manual }
 
-/// A detected face or body that Reshape sliders can target. Top-left normalized.
+/// A detected face or body that Reshape or Hair can target. Top-left normalized.
 struct ReshapeTarget {
     var anchor: CGPoint
     var frame: CGRect
@@ -70,7 +72,7 @@ final class EditorModel {
     enum BrushTarget: Equatable { case heal, magicErase, reshape(ManualWarp.Kind) }
     var reshapeKind: ManualWarp.Kind = .push
     var reshapeMode: ReshapeMode = .face
-    /// People found for Reshape, largest first; nil while analysing.
+    /// People found on the photo, largest first; nil until analysed.
     var reshapeTargets: (faces: [ReshapeTarget], bodies: [ReshapeTarget])?
     var selectedFace = 0
     var selectedBody = 0
@@ -299,7 +301,7 @@ final class EditorModel {
             toggleSubject(at: n)
             return
         }
-        if activeTool == .reshape {
+        if activeTool == .reshape || activeTool == .hair {
             selectPerson(at: n)
             return
         }
@@ -324,16 +326,34 @@ final class EditorModel {
 
     // MARK: reshape
 
+    /// Finds faces and bodies once, off the main thread.
+    func analyzePeople() async {
+        guard reshapeTargets == nil else { return }
+        reshapeTargets = await Self.analyze(session)
+    }
+
+    @concurrent
+    private static func analyze(_ session: RenderSession) async -> (faces: [ReshapeTarget], bodies: [ReshapeTarget]) {
+        let faces = session.cached("faces") { FaceAnalysis.run(on: session.proxyCGImage) }.faces
+            .map { ReshapeTarget(anchor: $0.anchor, frame: $0.frame, reach: $0.reach) }
+        let bodies = session.cached("bodies") { BodyAnalysis.run(on: session.proxyCGImage) }.bodies
+            .map { ReshapeTarget(anchor: $0.anchor, frame: $0.frame, reach: $0.reach) }
+        let bySize: (ReshapeTarget, ReshapeTarget) -> Bool = { $0.frame.width * $0.frame.height > $1.frame.width * $1.frame.height }
+        return (faces.sorted(by: bySize), bodies.sorted(by: bySize))
+    }
+
+    /// Faces or bodies the active tool targets.
     var reshapePeople: [ReshapeTarget] {
+        if activeTool == .hair { return reshapeTargets?.faces ?? [] }
         switch reshapeMode {
-        case .face: reshapeTargets?.faces ?? []
-        case .body: reshapeTargets?.bodies ?? []
-        case .manual: []
+        case .face: return reshapeTargets?.faces ?? []
+        case .body: return reshapeTargets?.bodies ?? []
+        case .manual: return []
         }
     }
 
     var selectedIndex: Int {
-        reshapeMode == .face ? selectedFace : selectedBody
+        activeTool == .hair || reshapeMode == .face ? selectedFace : selectedBody
     }
 
     var selectedPerson: ReshapeTarget? {
@@ -345,7 +365,7 @@ final class EditorModel {
         let people = reshapePeople
         guard let i = people.indices.filter({ people[$0].frame.insetBy(dx: -0.02, dy: -0.02).contains(n) })
             .min(by: { people[$0].anchor.distance(to: n) < people[$1].anchor.distance(to: n) }) else { return }
-        if reshapeMode == .face { selectedFace = i } else { selectedBody = i }
+        if activeTool == .hair || reshapeMode == .face { selectedFace = i } else { selectedBody = i }
     }
 
     // MARK: toast

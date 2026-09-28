@@ -9,6 +9,9 @@ struct CanvasOverlays: View {
                 ReshapeBrushOverlay(model: model, kind: kind)
             } else if model.activeTool == .reshape, !model.isComparing {
                 ReshapeTargetsOverlay(model: model)
+            } else if model.activeTool == .hair, !model.isComparing {
+                MaskStrokesView(model: model)
+                ReshapeTargetsOverlay(model: model)
             } else if let target = model.brushTarget {
                 BrushOverlay(model: model, target: target)
             } else if let layer = model.selectedLayer, !model.isComparing {

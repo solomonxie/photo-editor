@@ -18,7 +18,7 @@ keeps the edit in the app (Recent); Export writes a new photo to the library; �
   2 of 3 subjects                                          ← tool panel
  [ Keep | REMOVE | Blur | Colour ]                            (tools.md)
 ────────────────────────────────────────────────────────
- CUTOUT Beauty Reshape AI                                 ← tool bar
+ CUTOUT Beauty Reshape Hair AI                                 ← tool bar
 ```
 
 - `↶ ↷` = SF `arrow.uturn.backward` / `.forward`. They're disabled (`·`) at the ends of the history.
