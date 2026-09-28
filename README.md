@@ -31,3 +31,11 @@ xcodegen generate && open PhotoEditor.xcodeproj
 
 Design, UI and build plan: [`docs/design/photo-editor`](docs/design/photo-editor/).
 App Store release checklist: [`docs/release`](docs/release/).
+
+## Screenshots
+
+| Cutout | Beauty | Reshape |
+|:-:|:-:|:-:|
+| <img src="docs/screenshots/01-cutout.jpg" width="240"> | <img src="docs/screenshots/02-beauty.jpg" width="240"> | <img src="docs/screenshots/03-reshape.jpg" width="240"> |
+| **Export** | **Compress** | **Settings** |
+| <img src="docs/screenshots/04-export.jpg" width="240"> | <img src="docs/screenshots/05-compress.jpg" width="240"> | <img src="docs/screenshots/06-settings.jpg" width="240"> |
