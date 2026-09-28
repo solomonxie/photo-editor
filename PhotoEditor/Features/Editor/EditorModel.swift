@@ -3,19 +3,14 @@ import Observation
 import SwiftUI
 
 enum EditorTool: String, CaseIterable, Identifiable {
-    case adjust, filters, crop, retouch, reshape, text, stickers, cutout, ai
+    case cutout, retouch, reshape, ai
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .adjust: "Adjust"
-        case .filters: "Filters"
-        case .crop: "Crop"
         case .retouch: "Beauty"
         case .reshape: "Reshape"
-        case .text: "Text"
-        case .stickers: "Stickers"
         case .cutout: "Cutout"
         case .ai: "AI"
         }
@@ -23,13 +18,8 @@ enum EditorTool: String, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
-        case .adjust: "slider.horizontal.3"
-        case .filters: "camera.filters"
-        case .crop: "crop.rotate"
         case .retouch: "wand.and.rays"
         case .reshape: "figure.arms.open"
-        case .text: "textformat"
-        case .stickers: "face.smiling"
         case .cutout: "person.crop.rectangle"
         case .ai: "sparkles"
         }
@@ -55,20 +45,18 @@ final class EditorModel {
     private(set) var history = EditHistory()
     private(set) var renderVersion = 0
 
-    var activeTool: EditorTool? = .adjust {
+    var activeTool: EditorTool? = .cutout {
         didSet { toolChanged(from: oldValue) }
     }
     var selectedLayerID: UUID? {
         didSet { if oldValue != selectedLayerID { redraw() } }
     }
-    var editingTextLayerID: UUID?
     var isComparing = false {
         didSet { redraw() }
     }
     var toast: ToastMessage?
     var brushPreview: [BrushStroke] = []
     var brushTarget: BrushTarget?
-    var cropAspect: CropAspect = .free
 
     enum BrushTarget: Equatable { case heal, magicErase, reshape(ManualWarp.Kind) }
     var reshapeKind: ManualWarp.Kind = .push
@@ -161,48 +149,27 @@ final class EditorModel {
         if old == .cutout || activeTool == .cutout {
             redraw()
         }
-        if old == .crop || activeTool == .crop {
-            viewport.reset()
-            updateViewportImage()
-            redraw()
-        }
         if activeTool != .retouch && activeTool != .ai && activeTool != .reshape {
             brushTarget = nil
         }
     }
 
-    // MARK: geometry
-
-    var isCropping: Bool { activeTool == .crop }
-
-    var geometry: CropGeometry {
-        CropGeometry(crop: document.crop, sourceSize: document.source.size)
-    }
+    // MARK: viewport
 
     private func updateViewportImage() {
-        let size = isCropping ? geometry.rotatedSize : geometry.outputSize
+        let size = document.source.size
         if viewport.imageSize != size {
             viewport.imageSize = size
             viewport.clampOffset()
         }
     }
 
-    /// Output-normalized point (top-left origin) → source-normalized point.
-    func sourcePoint(fromOutput n: CGPoint) -> CGPoint {
-        let out = geometry.outputSize
-        let src = document.source.size
-        let p = CGPoint(x: n.x * out.width, y: (1 - n.y) * out.height)
-            .applying(geometry.outputTransform.inverted())
-        return CGPoint(x: p.x / src.width, y: 1 - p.y / src.height)
-    }
-
     /// Converts a brush radius in view points into a fraction of the source's long edge.
     func sourceRadius(points: CGFloat) -> Double {
         let frame = viewport.imageFrame
         guard frame.width > 0 else { return 0.02 }
-        let outPx = points / frame.width * geometry.outputSize.width
-        let fill = CropGeometry.fillScale(size: geometry.rotatedSize, angle: document.crop.angle * .pi / 180)
-        return outPx / fill / max(document.source.size.width, document.source.size.height)
+        let src = document.source.size
+        return points / frame.width * src.width / max(src.width, src.height)
     }
 
     // MARK: rendering
@@ -213,9 +180,7 @@ final class EditorModel {
 
     /// The canvas image for about `pixelWidth` output pixels.
     func canvasImage(pixelWidth: CGFloat) -> CIImage {
-        let geo = CropGeometry(crop: document.crop, sourceSize: session.proxy.extent.size)
-        let outWidth = isCropping ? geo.rotatedSize.width : geo.outputSize.width
-        let needed = min(1, pixelWidth / max(1, outWidth))
+        let needed = min(1, pixelWidth / max(1, session.proxy.extent.width))
         let source = scaledProxy(needed)
 
         var doc = document
@@ -223,14 +188,7 @@ final class EditorModel {
             doc.heal += brushPreview
         }
         if isComparing {
-            let original = pipeline(doc, source: source).image(RenderOptions(mode: .original))
-            return CropGeometry(crop: document.crop, sourceSize: source.extent.size).apply(original)
-        }
-        if isCropping {
-            return pipeline(doc, source: source).image(RenderOptions(mode: .straightenOnly))
-        }
-        if editingTextLayerID != nil {
-            doc.layers.removeAll { $0.id == editingTextLayerID }
+            return pipeline(doc, source: source).image(RenderOptions(mode: .original))
         }
         return pipeline(doc, source: source).image(RenderOptions(highlightSubjects: activeTool == .cutout))
     }
@@ -304,18 +262,12 @@ final class EditorModel {
     }
 
     func layerAspect(_ layer: Layer) -> Double {
-        session.cached("aspect:\(layer.id):\(Self.contentHash(layer.content))") {
-            LayerRasterizer.aspect(layer.content)
-        }
-    }
-
-    private static func contentHash(_ c: Layer.Content) -> Int {
-        (try? JSONEncoder().encode(c))?.hashValue ?? 0
+        layer.content.aspect
     }
 
     /// Topmost visible layer under an output-normalized point.
     func layer(at n: CGPoint) -> Layer? {
-        let out = geometry.outputSize
+        let out = document.source.size
         for layer in document.layers.reversed() where !layer.isHidden {
             let w = layer.width * out.width
             let h = w * layerAspect(layer)
@@ -333,23 +285,14 @@ final class EditorModel {
             toggleSubject(at: n)
             return
         }
-        if let layer = layer(at: n) {
-            if selectedLayerID == layer.id, case .text = layer.content {
-                editingTextLayerID = layer.id
-            } else {
-                selectedLayerID = layer.id
-            }
-        } else {
-            selectedLayerID = nil
-        }
+        selectedLayerID = layer(at: n)?.id
     }
 
     // MARK: cutout
 
     func toggleSubject(at n: CGPoint) {
         guard var spec = document.cutout else { return }
-        let src = sourcePoint(fromOutput: n)
-        let label = pipeline().subjects.instance(at: src)
+        let label = pipeline().subjects.instance(at: n)
         guard label > 0 else { return }
         if spec.subjects.contains(label) {
             guard spec.subjects.count > 1 else { return }

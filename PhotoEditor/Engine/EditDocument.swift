@@ -8,9 +8,6 @@ nonisolated struct EditDocument: Codable, Equatable, Sendable {
     var source: SourceInfo
     var patches: [PatchOp] = []
     var heal: [BrushStroke] = []
-    var crop = CropSpec()
-    var adjust = AdjustValues()
-    var filter: FilterRef?
     var smoothSkin: Double = 0
     var redEye = false
     var beauty: [BeautyKey: Double] = [:]
@@ -29,16 +26,14 @@ nonisolated struct EditDocument: Codable, Equatable, Sendable {
         source = try c.decode(SourceInfo.self, forKey: .source)
         patches = try c.decodeIfPresent([PatchOp].self, forKey: .patches) ?? []
         heal = try c.decodeIfPresent([BrushStroke].self, forKey: .heal) ?? []
-        crop = try c.decodeIfPresent(CropSpec.self, forKey: .crop) ?? CropSpec()
-        adjust = try c.decodeIfPresent(AdjustValues.self, forKey: .adjust) ?? AdjustValues()
-        filter = try c.decodeIfPresent(FilterRef.self, forKey: .filter)
         smoothSkin = try c.decodeIfPresent(Double.self, forKey: .smoothSkin) ?? 0
         redEye = try c.decodeIfPresent(Bool.self, forKey: .redEye) ?? false
         beauty = try c.decodeIfPresent([BeautyKey: Double].self, forKey: .beauty) ?? [:]
         makeup = try c.decodeIfPresent([MakeupPart: MakeupItem].self, forKey: .makeup) ?? [:]
         reshape = try c.decodeIfPresent(ReshapeSpec.self, forKey: .reshape) ?? ReshapeSpec()
         cutout = try c.decodeIfPresent(CutoutSpec.self, forKey: .cutout)
-        layers = try c.decodeIfPresent([Layer].self, forKey: .layers) ?? []
+        // Skips layer kinds that no longer exist (text, emoji).
+        layers = (try c.decodeIfPresent([Lossy<Layer>].self, forKey: .layers) ?? []).compactMap(\.value)
     }
 
     var isUntouched: Bool {
@@ -53,54 +48,6 @@ nonisolated struct SourceInfo: Codable, Equatable, Sendable {
     var pixelHeight: Int
 
     var size: CGSize { CGSize(width: pixelWidth, height: pixelHeight) }
-}
-
-// MARK: - Adjust
-
-nonisolated enum AdjustKey: String, Codable, CodingKeyRepresentable, CaseIterable, Sendable {
-    case exposure, brilliance, brightness, contrast, highlights, shadows
-    case saturation, vibrance, warmth, tint, sharpness, vignette, grain
-
-    var isBipolar: Bool {
-        switch self {
-        case .sharpness, .vignette, .grain: false
-        default: true
-        }
-    }
-}
-
-nonisolated struct AdjustValues: Codable, Equatable, Sendable {
-    var auto = false
-    /// −100…100 (bipolar) or 0…100 (unipolar); missing = 0.
-    var values: [AdjustKey: Double] = [:]
-
-    subscript(key: AdjustKey) -> Double {
-        get { values[key] ?? 0 }
-        set { values[key] = newValue == 0 ? nil : newValue }
-    }
-
-    var isIdentity: Bool { !auto && values.isEmpty }
-}
-
-// MARK: - Filter
-
-nonisolated struct FilterRef: Codable, Equatable, Sendable {
-    var id: String
-    var intensity: Double = 1
-}
-
-// MARK: - Crop
-
-nonisolated struct CropSpec: Codable, Equatable, Sendable {
-    /// Quarter turns counter-clockwise.
-    var quarterTurns = 0
-    var flipped = false
-    /// Straighten, degrees, −45…45.
-    var angle: Double = 0
-    /// Normalized rect in the rotated+straightened image, origin top-left.
-    var rect = CGRect(x: 0, y: 0, width: 1, height: 1)
-
-    var isIdentity: Bool { self == CropSpec() }
 }
 
 // MARK: - Brush masks
@@ -186,9 +133,9 @@ nonisolated struct CutoutSpec: Codable, Equatable, Sendable {
 nonisolated struct Layer: Codable, Equatable, Sendable, Identifiable {
     var id = UUID()
     var content: Content
-    /// Centre, normalized to the output (cropped) canvas.
+    /// Centre, normalized to the canvas.
     var center = CGPoint(x: 0.5, y: 0.5)
-    /// Width as a fraction of the output canvas width.
+    /// Width as a fraction of the canvas width.
     var width: Double = 0.6
     /// Radians, clockwise.
     var rotation: Double = 0
@@ -196,42 +143,23 @@ nonisolated struct Layer: Codable, Equatable, Sendable, Identifiable {
     var isHidden = false
 
     enum Content: Codable, Equatable, Sendable {
-        case text(TextSpec)
-        case emoji(String)
         case image(asset: String, aspect: Double)
-    }
 
-    var displayName: String {
-        switch content {
-        case .text(let t): t.string.isEmpty ? "Text" : t.string
-        case .emoji(let e): "Sticker \(e)"
-        case .image: "Image"
+        var aspect: Double {
+            switch self {
+            case .image(_, let aspect): aspect
+            }
         }
     }
+
+    var displayName: String { "Image" }
 }
 
-nonisolated struct TextSpec: Codable, Equatable, Sendable {
-    var string: String
-    var font: TextFont = .system
-    var color: RGBA = RGBA(r: 1, g: 1, b: 1)
-    var style: Style = .plain
-    var alignment: Alignment = .center
+nonisolated struct Lossy<T: Decodable & Sendable>: Decodable, Sendable {
+    let value: T?
 
-    enum Style: String, Codable, CaseIterable, Sendable { case plain, outline, background, shadow }
-    enum Alignment: String, Codable, CaseIterable, Sendable { case leading, center, trailing }
-}
-
-nonisolated enum TextFont: String, Codable, CaseIterable, Sendable {
-    case system, serif, rounded, marker, mono
-
-    var displayName: String {
-        switch self {
-        case .system: "SF Pro"
-        case .serif: "New York"
-        case .rounded: "Rounded"
-        case .marker: "Marker"
-        case .mono: "Mono"
-        }
+    init(from decoder: Decoder) throws {
+        value = try? T(from: decoder)
     }
 }
 
