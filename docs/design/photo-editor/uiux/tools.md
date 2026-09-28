@@ -23,7 +23,7 @@ On-device. Vision `VNGenerateForegroundInstanceMaskRequest`.
 
 ```
 no subject     "No clear subject found. Try a photo with a person, pet or object."
-remove         transparent (checkerboard) → Save offers PNG
+remove         transparent (checkerboard) → Export offers PNG
 blur           slider 0–100 appears
 color          swatches ● ● ● ● ⊕
 ```

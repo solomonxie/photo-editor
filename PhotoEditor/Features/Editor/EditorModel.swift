@@ -215,7 +215,7 @@ final class EditorModel {
         try? ProjectStore.save(doc, to: project)
     }
 
-    /// Writes the edit to disk; called only after the user saves or shares.
+    /// Writes the edit into the app's projects; called only on Save.
     func commit() async {
         let doc = document
         let project = project

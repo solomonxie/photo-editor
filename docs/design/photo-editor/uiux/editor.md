@@ -1,10 +1,10 @@
 # Editor
 
-Full-screen, always dark. It's reached from Home (a new pick or a recent). Edits
-are kept only when saved or shared; ✕ with unsaved edits asks "Discard changes?".
+Full-screen, always dark. It's reached from Home (a new pick or a recent). Save
+keeps the edit in the app (Recent); Export writes a new photo to the library; ✕ with unsaved edits asks "Discard changes?".
 
 ```
- ✕        ↶   ↷              Compare   Layers   [[ Save ]]
+ ✕        ↶   ↷         Compare   Layers   ⇪   [[ Save ]]
 ┌────────────────────────────────────────────────────────┐
 │                                                        │
 │                                                        │
@@ -23,9 +23,10 @@ are kept only when saved or shared; ✕ with unsaved edits asks "Discard changes
 
 - `↶ ↷` = SF `arrow.uturn.backward` / `.forward`. They're disabled (`·`) at the ends of the history.
 - Compare = SF `square.split.2x1`. Holding it acts like holding the canvas.
+- Export ⇪ = SF `square.and.arrow.up`. Save is dimmed (`·`) with no unsaved edits.
 - Layers = SF `square.3.layers.3d`. It shows a count badge when there are more than 1 layer.
 
-Reached from: Home. Exits: ✕ → Home · Save → Save sheet · Layers → Layers sheet.
+Reached from: Home. Exits: ✕ → Home · Save → stays, ⌐ Saved ¬ · ⇪ → Export sheet · Layers → Layers sheet.
 
 ## Canvas behaviour
 
@@ -48,7 +49,7 @@ loading     canvas: blurred low-res preview → sharp     ← embedded HEIC thum
                                                           first, proxy next
 editing     as the default mock
 comparing   top-left pill: "Original"                    ← while held
-exporting   Save sheet shows ⟳ Exporting…  ( Cancel )     ← CI gives no progress;
+exporting   Export sheet shows ⟳ Exporting…  ( Cancel )     ← CI gives no progress;
                                                           no fake bar
 error       ⌐ Something went wrong rendering. Undo the last change. ¬
 low memory  ⌐ Closed other layers' previews to free memory ¬   ← rare; iOS warning
@@ -83,11 +84,11 @@ Half sheet. Top of the list = front.
 one layer   only "Photo" row + hint "Copy a cutout as a sticker to get layers."
 ```
 
-## Save sheet
+## Export sheet
 
 ```
 ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-                          Save
+                         Export
 ╭──────────────────────────────────────────────────────╮
 │ Format              [ HEIC | JPEG | PNG ]            │ ← PNG auto-picked
 ├──────────────────────────────────────────────────────┤   when there's
@@ -97,15 +98,15 @@ one layer   only "Photo" row + hint "Copy a cutout as a sticker to get layers."
 │ Quality         [ HIGH | MEDIUM | SMALL ]            │ ← hidden for PNG;
 ├──────────────────────────────────────────────────────┤   remembered
 │ File size                              3.4 MB  / ⟳   │ ← real encode, 250 ms
-╰──────────────────────────────────────────────────────╯   debounce; Save
+╰──────────────────────────────────────────────────────╯   debounce; Export
                                                            reuses the bytes
-            [[ Save to Photos ]]
+           [[ Export to Photos ]]
                ( Share… )                                ← [share sheet]
 ```
 
 ```
 exporting  ⟳ Exporting…                      ( Cancel )
-done       sheet closes → ⌐ Saved to Photos ¬
+done       sheet closes → ⌐ Exported to Photos ¬
 denied     ┌───────────────────────────────────────────┐
            │  Allow adding to Photos                   │
            │  Photo Editor can only add new photos. It │
@@ -132,10 +133,12 @@ denied     ┌──────────────────────
 | `editor.compare.pill` | Original |
 | `editor.layers.title` | Layers |
 | `editor.layers.empty` | Copy a cutout as a sticker to get layers. |
-| `editor.save.title` | Save |
-| `editor.save.photos` | Save to Photos |
-| `editor.save.share` | Share… |
-| `editor.save.done` | Saved to Photos |
-| `editor.save.denied.title` | Allow adding to Photos |
-| `editor.save.denied.body` | Photo Editor can only add new photos. It can't see your library. |
+| `editor.save` | Save |
+| `editor.save.done` | Saved |
+| `editor.export.title` | Export |
+| `editor.export.photos` | Export to Photos |
+| `editor.export.share` | Share… |
+| `editor.export.done` | Exported to Photos |
+| `editor.export.denied.title` | Allow adding to Photos |
+| `editor.export.denied.body` | Photo Editor can only add new photos. It can't see your library. |
 | `editor.error.render` | Something went wrong rendering. Undo the last change. |
