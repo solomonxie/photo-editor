@@ -137,7 +137,7 @@ nonisolated enum BeautyLook: String, CaseIterable, Sendable {
         let v = values
         doc.smoothSkin = v.smooth
         doc.beauty = v.beauty
-        for key in [FaceShapeKey.slim, .eyes, .nose, .jaw] { doc.reshape.face[key] = v.face[key] }
+        for key in [FaceShapeKey.slim, .eyes, .nose, .jaw] { doc.reshape.allFaces[key] = v.face[key] }
     }
 
     static func current(_ doc: EditDocument) -> BeautyLook? {

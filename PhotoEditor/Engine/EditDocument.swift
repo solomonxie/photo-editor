@@ -107,13 +107,75 @@ nonisolated struct ManualWarp: Codable, Equatable, Sendable {
     var radius: Double
 }
 
+/// One person's sliders, −100…100 each.
+nonisolated struct PersonShape<Key: Hashable & Codable & CodingKeyRepresentable & Sendable>: Codable, Equatable, Sendable {
+    /// Face centre or torso centre, source-normalized top-left; nil = everyone (older edits).
+    var anchor: CGPoint?
+    var values: [Key: Double] = [:]
+}
+
 nonisolated struct ReshapeSpec: Codable, Equatable, Sendable {
-    /// −100…100 each.
-    var face: [FaceShapeKey: Double] = [:]
-    var body: [BodyShapeKey: Double] = [:]
+    var faces: [PersonShape<FaceShapeKey>] = []
+    var bodies: [PersonShape<BodyShapeKey>] = []
     var manual: [ManualWarp] = []
 
-    var isIdentity: Bool { face.isEmpty && body.isEmpty && manual.isEmpty }
+    var isIdentity: Bool { faces.isEmpty && bodies.isEmpty && manual.isEmpty }
+
+    init() {}
+
+    /// Face sliders applied to every face (Beauty looks).
+    var allFaces: [FaceShapeKey: Double] {
+        get { faces.first { $0.anchor == nil }?.values ?? [:] }
+        set {
+            faces.removeAll { $0.anchor == nil }
+            if !newValue.isEmpty { faces.insert(PersonShape(values: newValue), at: 0) }
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey { case faces, bodies, manual }
+    private enum LegacyKeys: String, CodingKey { case face, body }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        faces = try c.decodeIfPresent([PersonShape<FaceShapeKey>].self, forKey: .faces) ?? []
+        bodies = try c.decodeIfPresent([PersonShape<BodyShapeKey>].self, forKey: .bodies) ?? []
+        manual = try c.decodeIfPresent([ManualWarp].self, forKey: .manual) ?? []
+        let legacy = try decoder.container(keyedBy: LegacyKeys.self)
+        if let v = try legacy.decodeIfPresent([FaceShapeKey: Double].self, forKey: .face), !v.isEmpty {
+            faces.append(PersonShape(values: v))
+        }
+        if let v = try legacy.decodeIfPresent([BodyShapeKey: Double].self, forKey: .body), !v.isEmpty {
+            bodies.append(PersonShape(values: v))
+        }
+    }
+
+    /// Values for the person at `anchor`: their own entry over any "everyone" entry.
+    static func values<K>(_ shapes: [PersonShape<K>], at anchor: CGPoint, within reach: Double) -> [K: Double] {
+        var out = shapes.first { $0.anchor == nil }?.values ?? [:]
+        let own = shapes.filter { $0.anchor != nil }
+            .min { $0.anchor!.distance(to: anchor) < $1.anchor!.distance(to: anchor) }
+        if let own, own.anchor!.distance(to: anchor) <= reach {
+            out.merge(own.values) { $1 }
+        }
+        return out
+    }
+
+    /// Sets one slider for the person at `anchor`, dropping entries that become empty.
+    static func set<K>(_ shapes: inout [PersonShape<K>], anchor: CGPoint, key: K, value: Double, reach: Double) {
+        let i = shapes.indices.filter { shapes[$0].anchor != nil }
+            .min { shapes[$0].anchor!.distance(to: anchor) < shapes[$1].anchor!.distance(to: anchor) }
+            .flatMap { shapes[$0].anchor!.distance(to: anchor) <= reach ? $0 : nil }
+        if let i {
+            shapes[i].values[key] = value == 0 ? nil : value
+            if shapes[i].values.isEmpty { shapes.remove(at: i) }
+        } else if value != 0 {
+            shapes.append(PersonShape(anchor: anchor, values: [key: value]))
+        }
+    }
+}
+
+extension CGPoint {
+    nonisolated func distance(to p: CGPoint) -> Double { hypot(x - p.x, y - p.y) }
 }
 
 // MARK: - Cutout

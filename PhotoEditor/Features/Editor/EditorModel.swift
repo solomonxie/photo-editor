@@ -26,6 +26,15 @@ enum EditorTool: String, CaseIterable, Identifiable {
     }
 }
 
+enum ReshapeMode: String, CaseIterable { case face, body, manual }
+
+/// A detected face or body that Reshape sliders can target. Top-left normalized.
+struct ReshapeTarget {
+    var anchor: CGPoint
+    var frame: CGRect
+    var reach: Double
+}
+
 struct ToastMessage: Equatable, Identifiable {
     let id = UUID()
     var text: String
@@ -60,6 +69,11 @@ final class EditorModel {
 
     enum BrushTarget: Equatable { case heal, magicErase, reshape(ManualWarp.Kind) }
     var reshapeKind: ManualWarp.Kind = .push
+    var reshapeMode: ReshapeMode = .face
+    /// People found for Reshape, largest first; nil while analysing.
+    var reshapeTargets: (faces: [ReshapeTarget], bodies: [ReshapeTarget])?
+    var selectedFace = 0
+    var selectedBody = 0
 
     private var savedDocument: EditDocument
 
@@ -285,6 +299,10 @@ final class EditorModel {
             toggleSubject(at: n)
             return
         }
+        if activeTool == .reshape {
+            selectPerson(at: n)
+            return
+        }
         selectedLayerID = layer(at: n)?.id
     }
 
@@ -302,6 +320,32 @@ final class EditorModel {
             spec.subjects.sort()
         }
         update { $0.cutout = spec }
+    }
+
+    // MARK: reshape
+
+    var reshapePeople: [ReshapeTarget] {
+        switch reshapeMode {
+        case .face: reshapeTargets?.faces ?? []
+        case .body: reshapeTargets?.bodies ?? []
+        case .manual: []
+        }
+    }
+
+    var selectedIndex: Int {
+        reshapeMode == .face ? selectedFace : selectedBody
+    }
+
+    var selectedPerson: ReshapeTarget? {
+        let people = reshapePeople
+        return people.indices.contains(selectedIndex) ? people[selectedIndex] : nil
+    }
+
+    private func selectPerson(at n: CGPoint) {
+        let people = reshapePeople
+        guard let i = people.indices.filter({ people[$0].frame.insetBy(dx: -0.02, dy: -0.02).contains(n) })
+            .min(by: { people[$0].anchor.distance(to: n) < people[$1].anchor.distance(to: n) }) else { return }
+        if reshapeMode == .face { selectedFace = i } else { selectedBody = i }
     }
 
     // MARK: toast
