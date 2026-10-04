@@ -1,3 +1,5 @@
-// Copy to Local.xcconfig (gitignored) and set your Apple Developer Team ID.
+// Copy to Local.xcconfig (gitignored) and fill in your own values.
 // developer.apple.com → Account → Membership details → Team ID.
 DEVELOPMENT_TEAM = REPLACE_WITH_YOUR_TEAM_ID
+// Reverse-DNS prefix you own. App bundle id becomes <APP_NAMESPACE>.app.
+APP_NAMESPACE = com.yourname.photoeditor

@@ -1,0 +1,7 @@
+// Tracked placeholders. Real values go in Local.xcconfig (gitignored), see Local.xcconfig.example.
+DEVELOPMENT_TEAM =
+// Keychain service / signpost subsystem; the app id adds ".app", the test bundle ".tests".
+APP_NAMESPACE = com.example.photoeditor
+APP_BUNDLE_ID = $(APP_NAMESPACE).app
+PRODUCT_BUNDLE_IDENTIFIER = $(APP_BUNDLE_ID)
+#include? "Local.xcconfig"

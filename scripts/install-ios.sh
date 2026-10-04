@@ -11,4 +11,4 @@ xcodegen generate
 xcodebuild -project PhotoEditor.xcodeproj -scheme PhotoEditor -configuration Release \
   -destination "id=$DEVICE" -derivedDataPath build/release -allowProvisioningUpdates build
 xcrun devicectl device install app --device "$DEVICE" build/release/Build/Products/Release-iphoneos/PhotoEditor.app
-xcrun devicectl device process launch --device "$DEVICE" --terminate-existing com.example.photoeditor.app
+xcrun devicectl device process launch --device "$DEVICE" --terminate-existing "$(sed -n 's/^APP_NAMESPACE *= *//p' Config/Local.xcconfig).app"

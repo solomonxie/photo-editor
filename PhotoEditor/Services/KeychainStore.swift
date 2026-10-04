@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 nonisolated enum KeychainStore {
-    static let service = "com.example.photoeditor"
+    static let service = AppNamespace.value
     /// Pre-multi-key single key, migrated by AIKeyStore.
     static let legacyAIKey = "ai.api.key"
 

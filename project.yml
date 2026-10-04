@@ -15,8 +15,8 @@ targets:
     type: application
     platform: iOS
     configFiles:
-      Debug: Config/Local.xcconfig
-      Release: Config/Local.xcconfig
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
     sources:
       - path: PhotoEditor
         excludes:
@@ -28,12 +28,13 @@ targets:
         UILaunchScreen: {}
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        AppNamespace: $(APP_NAMESPACE)
         ITSAppUsesNonExemptEncryption: false
         NSPhotoLibraryAddUsageDescription: "Save your edited photos to your library."
         NSPhotoLibraryUsageDescription: "Compress reads only the photos and videos you choose, adds smaller copies, and deletes originals only when you confirm."
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.photoeditor.app
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID)
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -42,8 +43,8 @@ targets:
     type: bundle.unit-test
     platform: iOS
     configFiles:
-      Debug: Config/Local.xcconfig
-      Release: Config/Local.xcconfig
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
     sources: [PhotoEditorTests]
     dependencies:
       - target: PhotoEditor
@@ -51,7 +52,7 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.photoeditor.tests
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_NAMESPACE).tests
         CODE_SIGN_STYLE: Automatic
 schemes:
   PhotoEditor:
