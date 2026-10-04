@@ -22,7 +22,7 @@ adjustments or text: the Photos app already does those. Only the edits it can't.
 ## Setup
 
 ```
-cp Config/Local.xcconfig.example Config/Local.xcconfig   # add your Team ID
+cp Config/Local.xcconfig.example Config/Local.xcconfig   # add your Team ID and bundle id prefix
 xcodegen generate && open PhotoEditor.xcodeproj
 ```
 

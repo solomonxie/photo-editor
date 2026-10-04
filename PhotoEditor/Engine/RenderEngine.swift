@@ -21,7 +21,7 @@ nonisolated enum RenderEngine {
         .name: "PhotoEditor.export",
     ])
 
-    static let signposter = OSSignposter(subsystem: "com.example.photoeditor", category: "render")
+    static let signposter = OSSignposter(subsystem: AppNamespace.value, category: "render")
 }
 
 /// What to produce from a document.
