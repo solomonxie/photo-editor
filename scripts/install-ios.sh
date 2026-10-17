@@ -9,6 +9,6 @@ DEVICE=${1:-$(xcrun devicectl list devices 2>/dev/null | awk '/available \(paire
 
 xcodegen generate
 xcodebuild -project PhotoEditor.xcodeproj -scheme PhotoEditor -configuration Release \
-  -destination "id=$DEVICE" -derivedDataPath build/release -allowProvisioningUpdates build
-xcrun devicectl device install app --device "$DEVICE" build/release/Build/Products/Release-iphoneos/PhotoEditor.app
+  -destination "id=$DEVICE" -derivedDataPath /tmp/photoeditor-/tmp/photoeditor-build/release -allowProvisioningUpdates build
+xcrun devicectl device install app --device "$DEVICE" /tmp/photoeditor-build/release/Build/Products/Release-iphoneos/PhotoEditor.app
 xcrun devicectl device process launch --device "$DEVICE" --terminate-existing "$(sed -n 's/^APP_NAMESPACE *= *//p' Config/Local.xcconfig).app"

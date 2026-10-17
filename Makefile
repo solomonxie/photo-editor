@@ -14,14 +14,14 @@ help:
 check:
 	xcodegen generate
 	xcodebuild -project PhotoEditor.xcodeproj -scheme PhotoEditor -configuration Release \
-	  -destination 'generic/platform=iOS' -derivedDataPath build/check -quiet build
+	  -destination 'generic/platform=iOS' -derivedDataPath /tmp/photoeditor-build/check -quiet build
 	@echo "Release build OK"
 
 test:
 	xcodegen generate
 	xcodebuild test -project PhotoEditor.xcodeproj -scheme PhotoEditor \
 	  -destination "id=$$(xcrun devicectl list devices 2>/dev/null | awk '/available \(paired\)/ && /physical/ {for (i=1;i<=NF;i++) if ($$i ~ /^[0-9A-F]{8}-[0-9A-F]{16}$$/) print $$i; exit}')" \
-	  -derivedDataPath build/test | grep -E "PERF (open|slider|export|foot)|error:|TEST (SUCC|FAIL)"
+	  -derivedDataPath /tmp/photoeditor-build/test | grep -E "PERF (open|slider|export|foot)|error:|TEST (SUCC|FAIL)"
 
 ios:
 	scripts/install-ios.sh
