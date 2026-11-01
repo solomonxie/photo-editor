@@ -1,0 +1,71 @@
+[
+  {
+    "photo": "portrait-cafe.jpg",
+    "modified": "@today 09:12",
+    "edits": {
+      "smoothSkin": 35,
+      "beauty": {
+        "whiten": 15,
+        "evenTone": 25,
+        "darkCircles": 40,
+        "brightEyes": 30,
+        "teeth": 20
+      }
+    }
+  },
+  {
+    "photo": "friends-beach.jpg",
+    "modified": "@today-1 19:40",
+    "edits": {
+      "reshape": {
+        "faces": [
+          {
+            "values": {
+              "slim": 18,
+              "eyes": 12
+            }
+          }
+        ],
+        "bodies": [
+          {
+            "values": {
+              "waist": 15,
+              "legs": 20
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "photo": "dog-park.jpg",
+    "modified": "@today-3 17:05",
+    "edits": {
+      "cutout": {
+        "subjects": [
+          0
+        ],
+        "background": "blur",
+        "blur": 60,
+        "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1,
+          "a": 1
+        }
+      }
+    }
+  },
+  {
+    "photo": "graduation.jpg",
+    "modified": "@today-6 21:30",
+    "edits": {
+      "redEye": true,
+      "smoothSkin": 20
+    }
+  },
+  {
+    "photo": "street-night.jpg",
+    "modified": "@today-12 23:02"
+  }
+]

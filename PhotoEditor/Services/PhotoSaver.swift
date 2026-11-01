@@ -14,6 +14,7 @@ enum PhotoSaver {
     }
 
     static func save(_ data: Data) async throws {
+        guard !AppData.isDemo else { throw AppData.DemoBlocked() }
         let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
         guard status == .authorized || status == .limited else { throw Failure.denied }
         do {

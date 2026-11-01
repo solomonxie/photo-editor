@@ -10,6 +10,7 @@ struct PhotoEditorApp: App {
 }
 
 struct RootView: View {
+    @AppStorage(AppData.demoKey) private var demoOn = false
     @State private var editor: EditorModel?
     @State private var loadingError: String?
 
@@ -17,6 +18,7 @@ struct RootView: View {
         NavigationStack {
             HomeView(open: open)
         }
+        .id(demoOn)
         .fullScreenCover(item: $editor) { model in
             EditorView(model: model) {
                 model.discard()

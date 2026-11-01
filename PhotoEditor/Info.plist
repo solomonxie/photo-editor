@@ -4,6 +4,8 @@
 <dict>
 	<key>AppNamespace</key>
 	<string>$(APP_NAMESPACE)</string>
+	<key>AppStoreRegion</key>
+	<string>$(STORE)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -21,13 +23,18 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Save your edited photos to your library.</string>
+	<string>Export adds your edited photos to your library as new photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Compress reads only the photos and videos you choose, adds smaller copies, and deletes originals only when you confirm.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiresFullScreen</key>

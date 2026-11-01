@@ -21,20 +21,30 @@ targets:
       - path: PhotoEditor
         excludes:
           - "**/README.md"
+      # Preset edits for demo mode (Settings → Demo).
+      - path: demo
+        type: folder
+        buildPhase: resources
     info:
       path: PhotoEditor/Info.plist
       properties:
         CFBundleDisplayName: Photo Editor
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         AppNamespace: $(APP_NAMESPACE)
         ITSAppUsesNonExemptEncryption: false
-        NSPhotoLibraryAddUsageDescription: "Save your edited photos to your library."
+        AppStoreRegion: $(STORE)
+        NSPhotoLibraryAddUsageDescription: "Export adds your edited photos to your library as new photos."
         NSPhotoLibraryUsageDescription: "Compress reads only the photos and videos you choose, adds smaller copies, and deletes originals only when you confirm."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID)
+        # App Store region (us = Canada/US, cn); `make ios STORE=cn`.
+        STORE: us
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor

@@ -29,6 +29,18 @@ xcodegen generate && open PhotoEditor.xcodeproj
 `make help` lists the rest: `make ios` (Release build onto the paired iPhone), `make test`
 (unit tests and the 48 MP benchmark on the device), `make release` (archive and upload).
 
+`make ios STORE=cn` builds for the China App Store (Info.plist `AppStoreRegion`, read via
+`storeRegion()`; `cn` turns off the OpenAI/Gemini AI tools); default `us` (Canada/US). `make release` takes `STORE` too.
+
+## Demo
+
+- Settings → Demo mode: switches instantly to a separate edits store (`DemoProjects/`); real
+  edits untouched. Export and Compress don't write to Photos while it's on. Reset Demo Data
+  re-seeds.
+- Preset: `demo/projects.json` (photo, `"@today-1 19:40"` relative date, saved edits as
+  `EditDocument` fields) + photos in `demo/photos/` (not committed yet: add your own or
+  licensed photos; missing ones are skipped).
+
 Design, UI and build plan: [`docs/design/photo-editor`](docs/design/photo-editor/).
 App Store release checklist: [`docs/release`](docs/release/).
 

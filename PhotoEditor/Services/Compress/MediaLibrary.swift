@@ -137,6 +137,7 @@ nonisolated enum MediaLibrary {
 
     /// Adds a copy dated and located like the original.
     static func addCopy(of id: String, photo: Data? = nil, video: URL? = nil) async throws {
+        guard !AppData.isDemo else { throw AppData.DemoBlocked() }
         guard let a = asset(id) else { throw Failure.missing }
         let date = a.creationDate
         let location = a.location
@@ -162,6 +163,7 @@ nonisolated enum MediaLibrary {
 
     /// iOS asks the user to confirm; deleted items go to Recently Deleted.
     static func delete(_ ids: [String]) async throws {
+        guard !AppData.isDemo else { throw AppData.DemoBlocked() }
         try await PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.deleteAssets(PHAsset.fetchAssets(withLocalIdentifiers: ids, options: nil))
         }

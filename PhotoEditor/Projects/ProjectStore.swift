@@ -20,7 +20,11 @@ nonisolated struct Project: Identifiable, Hashable, Sendable {
 
 @Observable
 final class ProjectStore {
-    static let shared = ProjectStore()
+    /// The demo store (Settings → Demo mode) is a separate folder; real edits are never touched.
+    static var shared: ProjectStore { AppData.isDemo ? demo : real }
+    private static let real = ProjectStore()
+    static let demo = ProjectStore(root: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("DemoProjects", isDirectory: true))
 
     private(set) var projects: [Project] = []
     private var neverSaved: Set<UUID> = []
