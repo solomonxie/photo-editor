@@ -26,7 +26,9 @@ final class AIKeyStore {
         migrateLegacy()
     }
 
-    var hasKeys: Bool { !keys.isEmpty }
+    var hasKeys: Bool { !usableKeys.isEmpty }
+
+    private var usableKeys: [AIKeyInfo] { keys.filter(\.vendor.isAvailable) }
 
     func add(vendor: AIVendor, secret: String) {
         let info = AIKeyInfo(vendor: vendor)
@@ -56,6 +58,7 @@ final class AIKeyStore {
 
     /// Keys in the order to try for one call.
     func attemptOrder() -> [AIKeyInfo] {
+        let keys = usableKeys
         guard strategy == .roundRobin, keys.count > 1 else { return keys }
         let start = roundRobinCursor % keys.count
         roundRobinCursor += 1

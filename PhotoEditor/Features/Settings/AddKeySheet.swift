@@ -15,7 +15,7 @@ struct AddKeySheet: View {
             Form {
                 Section {
                     Picker("Vendor", selection: $vendor) {
-                        ForEach(AIVendor.allCases) { Text($0.name).tag($0) }
+                        ForEach(AIVendor.available) { Text($0.name).tag($0) }
                     }
                     HStack {
                         Group {

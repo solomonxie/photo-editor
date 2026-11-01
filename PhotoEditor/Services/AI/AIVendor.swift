@@ -6,6 +6,11 @@ nonisolated enum AIVendor: String, Codable, CaseIterable, Identifiable, Sendable
 
     var id: String { rawValue }
 
+    /// None on the China App Store, where OpenAI and Gemini aren't permitted.
+    static var available: [AIVendor] { storeRegion() == .cn ? [] : allCases }
+
+    var isAvailable: Bool { Self.available.contains(self) }
+
     var name: String {
         switch self {
         case .openAI: "OpenAI"

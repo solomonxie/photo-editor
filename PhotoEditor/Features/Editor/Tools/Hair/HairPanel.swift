@@ -9,6 +9,8 @@ struct HairPanel: View {
     @State private var startedAt: Date?
     @State private var error: AIRunner.Failure?
     @State private var showAddKey = false
+    @State private var askConsent = false
+    @AppStorage(AIUploadConsent.key) private var consented = false
     @State private var keys = AIKeyStore.shared
     @State private var network = NetworkStatus.shared
 
@@ -46,13 +48,26 @@ struct HairPanel: View {
             running?.cancel()
             model.brushPreview = []
         }
+        .aiUploadConsent(isPresented: $askConsent, vendors: keys.keys.map(\.vendor), onSend: run)
         .sheet(isPresented: $showAddKey) {
             AddKeySheet()
                 .presentationDetents([.medium])
         }
     }
 
+    @ViewBuilder
     private var noKey: some View {
+        if AIVendor.available.isEmpty {
+            Text("AI features aren't available in this region.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(height: 60)
+        } else {
+            addKeyPrompt
+        }
+    }
+
+    private var addKeyPrompt: some View {
         VStack(spacing: 10) {
             Text("Hair and beard use your own AI key.")
                 .font(.subheadline)
@@ -92,7 +107,7 @@ struct HairPanel: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Apply") { run() }
+            Button("Apply") { consented ? run() : (askConsent = true) }
                 .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 7)

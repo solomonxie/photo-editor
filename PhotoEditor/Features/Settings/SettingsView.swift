@@ -9,10 +9,14 @@ struct SettingsView: View {
     @State private var showInfo = false
     @State private var confirmDeleteAll = false
     @State private var totalSize: Int64?
+    @AppStorage(AppData.demoKey) private var demoOn = false
+    @State private var demoResets = 0
 
     var body: some View {
         Form {
-            aiSection
+            if !AIVendor.available.isEmpty {
+                aiSection
+            }
             Section("Export") {
                 Picker("Default format", selection: $format) {
                     Text("HEIC").tag(ExportFormat.heic)
@@ -38,6 +42,21 @@ struct SettingsView: View {
                         Text(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))
                     }
                 }
+            }
+            Section {
+                Toggle("Demo mode", isOn: Binding(get: { demoOn }, set: { AppData.setDemo($0) }))
+                if demoOn {
+                    Button("Reset Demo Data") {
+                        DemoSeed.seed()
+                        demoResets += 1
+                        refreshSize()
+                    }
+                    .sensoryFeedback(.success, trigger: demoResets)
+                }
+            } header: {
+                Text("Demo")
+            } footer: {
+                Text("Sample edits in a separate store, for screenshots. Your own edits and Photos library aren't touched; export and Compress don't write while it's on.")
             }
             Section("About") {
                 NavigationLink("Privacy") { PrivacyView() }
@@ -134,7 +153,7 @@ struct SettingsView: View {
                 .disabled(keys.keys.count < 2)
             }
         } footer: {
-            Text("Only for AI Magic Erase, Fill and Restyle. Everything else runs on this iPhone.")
+            Text("Only for AI Magic Erase, Fill, Restyle and Hair. Everything else runs on this iPhone.")
         }
     }
 
@@ -196,16 +215,21 @@ struct PrivacyView: View {
     var body: some View {
         List {
             Section {
-                Text("Photo Editor has no account, no analytics and no ads. Your photos and edits stay on this iPhone.")
+                Text("Photo Editor has no account, no analytics and no ads. Your photos and edits stay on this iPhone\(AIVendor.available.isEmpty ? "" : ", unless you use an AI feature").")
             }
-            Section("What leaves the device") {
-                Text("Only when you tap Erase or Restyle: a copy of the photo (up to 1536 px), the painted area and your prompt, sent directly to the AI vendor whose key you added.")
+            if !AIVendor.available.isEmpty {
+                Section("What leaves the device") {
+                    Text("Only when you run Magic Erase, Fill, Restyle or Hair: a copy of the photo (up to 1536 px), the painted or face area and the prompt, sent directly to the AI vendor whose key you added.")
+                }
             }
             Section("Photos access") {
-                Text("Photos are picked with the system picker, so the app never sees your library. Saving asks for add-only access.")
+                Text("Photos to edit are picked with the system picker, which shares only the photo you choose. Export asks for add-only access.")
+                Text("Compress asks for read/write access to your library, only when you use it. It reads the photos and videos you choose, adds smaller copies, and deletes originals only when you confirm. Nothing it reads leaves this iPhone.")
             }
-            Section("AI keys") {
-                Text("Stored in this iPhone's Keychain, never synced to iCloud and never included in backups of the app's data.")
+            if !AIVendor.available.isEmpty {
+                Section("AI keys") {
+                    Text("Stored in this iPhone's Keychain, never synced to iCloud and never included in backups of the app's data.")
+                }
             }
         }
         .navigationTitle("Privacy")
