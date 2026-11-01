@@ -4,8 +4,8 @@ Bundle ID `com.example.photoeditor.app` (yours — set `APP_NAMESPACE` in `Confi
 
 - [`listing.md`](listing.md) — step-by-step plan and every App Store Connect field, ready to paste
 - [`privacy-policy.md`](privacy-policy.md) — the policy; its GitHub URL is the Privacy Policy URL
-- `screenshots/6.9`, `screenshots/6.5` — upload-ready, from `make screenshots SHOTS=<dir>`.
-  **Gitignored:** they show real photos, and this repo is public.
+- `screenshots/` — 3 shots (Home, Beauty, Hair), 2026-10-03, from the iPhone with a non-personal portrait; `make screenshots SHOTS=<dir>` to add more.
+  Gitignored (public repo, and earlier sets showed real photos). The current set shows a generated portrait, so it is safe to commit if you want it in the repo; see [Screenshots](listing.md#screenshots).
 
 Before the first build: `cp Config/Local.xcconfig.example Config/Local.xcconfig` and put your
 Apple Developer Team ID in it. It is gitignored — an account identifier does not belong in a

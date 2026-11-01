@@ -37,13 +37,14 @@ No capabilities are needed (no iCloud, no push, no App Groups).
 
 - [ ] `make ios` → Release build on the paired iPhone.
 - [ ] Smoke test:
-  - Retouch → Smooth skin on a face, and heal a spot.
-  - Reshape → Body on a full-length photo.
+  - Beauty → Auto → Natural on a face, then Smooth, and heal a spot.
+  - Reshape → Body on a full-length photo. On a group photo, tap one face: only that person changes.
   - Cutout → Blur, then Copy as Sticker.
   - Save: the edit appears in Home's Recent.
   - ⇪ → Export to Photos (grant add-only access). Open Photos and check the result.
   - Reopen the edit from Home: every slider is still adjustable.
   - Home → ⇲ Compress: pick a few photos and a video, compress, check the copies in Photos, delete originals.
+  - Settings → Demo mode on: Home shows the sample edits; Export says demo mode doesn't write to Photos. Off again: your own edits are back.
 - [ ] `make test` → unit tests and the 48 MP benchmark on the device (numbers print as `PERF …`).
 
 ## 5. Create the app in App Store Connect
@@ -87,7 +88,7 @@ Fallback, Xcode GUI: `xcodegen generate && open PhotoEditor.xcodeproj` → desti
 
 - [ ] App Store Connect → **TestFlight** → the build shows no "Missing Compliance" (see [Export compliance](#export-compliance)).
 - [ ] Internal Testing → **+** group `Me` → add your Apple ID → install via the TestFlight app on the iPhone.
-- [ ] Same smoke test as step 4, on the TestFlight build (this is the exact binary Apple reviews). If you have an OpenAI or Gemini key, also run one Magic Erase.
+- [ ] Same smoke test as step 4, on the TestFlight build (this is the exact binary Apple reviews). If you have an OpenAI or Gemini key, also run one Magic Erase and one Hair → Beard → Short Beard.
 
 ## 9. Submit
 
@@ -100,9 +101,10 @@ Fallback, Xcode GUI: `xcodegen generate && open PhotoEditor.xcodeproj` → desti
 - Typical: 24–48 h. Status: Waiting for Review → In Review → Pending Developer Release.
 - Rejection → **Resolution Center**: reply there, or fix and re-run `make release` (the build number is a fresh timestamp), attach the new build, resubmit. `MARKETING_VERSION` does not need bumping for a rejected version.
 - Likely questions, all answered in the review notes:
-  - The AI features: optional, and they need the user's own key.
+  - The AI features (AI tool and Hair): optional, and they need the user's own key.
   - Photos access: add-only for the editor; read/write only for Compress.
   - Body reshape: a standard beauty-editor tool, applied only to the user's own photo.
+  - Demo mode in Settings: sample edits for screenshots, in a separate store; explained in the notes.
 
 ## 11. Release
 
@@ -114,33 +116,24 @@ Fallback, Xcode GUI: `xcodegen generate && open PhotoEditor.xcodeproj` → desti
 ## Screenshots
 
 Apple requires one set: **iPhone 6.9" Display**, exactly `1320 × 2868` (or `1290 × 2796`).
-App Store Connect scales it down for every smaller phone. The 6.5" slot (`1284 × 2778`) is
-optional and generated anyway.
+App Store Connect scales it down for every smaller phone.
 
 Capture on the paired iPhone 14 (`1170 × 2532`) and let the script do the rest — the
 aspect ratios differ by 0.4%, which is invisible.
 
-What sits in `docs/release/screenshots/` now was captured from the Debug build using your own
-photos. It proves the pipeline and is usable as-is, but it's gitignored because it shows you.
-Recapture with photos you're happy to publish (a model-released stock photo is safest), then:
+**Ready (2026-10-03).** `docs/release/screenshots/*.jpg` — 3 shots, 1320 × 2868, JPEG q80, from the paired iPhone 14, using a generated (non-personal) portrait. Upload in filename order:
 
-1. `make ios` — a Release build.
-2. Status bar: full battery, Wi-Fi, no notification banners. Side button + Volume Up per shot.
-3. Shots, in upload order (3 minimum, 10 maximum — the first two are what people actually see):
-   1. **Cutout** — a person with the background on Blur (reads as Portrait mode)
-   2. **Retouch** — a close-up portrait, Smooth skin at ~40
-   3. **Reshape** — a full-length photo, Body → Waist moved
-   4. **AI** — Fill with "fuller hair" typed (needs a key in Settings)
-   5. **Home** — a grid of your recent edits
-4. AirDrop to the Mac, e.g. `~/Desktop/shots/`, then:
+1. `01-home.jpg` — **Home**, recent edits and Open Photo
+2. `02-beauty.jpg` — **Beauty**, Smooth skin slider and the tool bar
+3. `03-hair.jpg` — **Hair**, "uses your own AI key" with Add AI Key. The red bars over the forehead are a placeholder animation caught mid-frame; swap this shot for a Cutout or Reshape one if it reads as a glitch.
+
+3 is Apple's minimum. To add more (Cutout, Reshape, Export, up to 10): capture on the iPhone with a non-personal photo, name them `04-cutout.png`, … and run
 
 ```
 make screenshots SHOTS=~/Desktop/shots
 ```
 
-Outputs overwrite `docs/release/screenshots/{6.9,6.5}/`, named after the files you fed in —
-so name them `01-cutout.png`, `02-retouch.png` … and the upload order sorts itself.
-Drag the `6.9` folder's files into the 6.9" slot.
+Outputs go to `docs/release/screenshots/`, named after the files you fed in, so the upload order sorts itself.
 
 App Preview video: skip for 1.0.
 
@@ -170,10 +163,10 @@ App Preview video: skip for 1.0.
 | App Review → Attachment | none |
 | Version Release | **Manually release this version** |
 
-Promotional Text (138/170):
+Promotional Text (139/170 — no price wording such as "free" or "no subscription" in name, subtitle or here; guideline 2.3.7):
 
 ```
-Edit photos on your iPhone, no subscription: background cutout, smooth skin, reshape face and body. Everything but AI stays on the device.
+Retouch on your iPhone: background cutout, smooth skin, face and body reshape. Everything except the optional AI tools stays on the device.
 ```
 
 Description:
@@ -181,14 +174,17 @@ Description:
 ```
 A photo editor that does the touch-ups people pay monthly for — on your iPhone, with no account, no subscription and no watermark.
 
-RETOUCH
+BEAUTY
+• One-tap looks — Natural, Soft, Glam — that stay fully adjustable
 • Smooth skin that keeps eyes, brows and lips sharp
+• Whiten, even tone, de-shine, dark circles, bright eyes, whiter teeth
 • Tap a blemish to heal it, or paint over a larger spot
 • Red-eye correction
 
 RESHAPE
 • Face: slimmer cheeks, chin, bigger eyes, smaller nose, forehead
 • Body: waist, hips, chest, legs, shoulders and arms, placed by on-device pose detection
+• Group photos: tap one person to reshape just them
 • A manual brush to push, grow or shrink anything by hand
 
 CUTOUT
@@ -199,32 +195,38 @@ CUTOUT
 NOTHING IS FINAL
 Every edit stays adjustable. Save keeps the edit in the app — come back next week and every slider is where you left it. Export adds a new photo to your library; your original is never touched.
 
+SAVE SPACE
+• Export at Full, 4K, 2K or HD with a quality level and a live file-size estimate
+• Compress photos and videos you pick into smaller HEIC/HEVC copies, keeping their date and place; delete the originals only if you choose
+
 FAST
 Built on Apple's Metal and Core Image. Sliders update every frame, and a 48-megapixel photo exports in about a second on an iPhone 14.
 
 OPTIONAL AI, ON YOUR OWN KEY
-Magic Erase, Fill ("fuller hair", "a hat") and Restyle use your own OpenAI or Google Gemini API key. The key stays in this iPhone's Keychain, the provider bills you directly, and only the photo and prompt you run are sent. Skip it and everything else still works.
+Magic Erase, Fill ("fuller hair", "a hat"), Restyle and Hair — add or thicken hair, bangs, beards, a mustache, a new hair colour, on the face you tap — use your own OpenAI or Google Gemini API key. The key stays in this iPhone's Keychain, the provider bills you directly, and only the photo and prompt you run are sent. Skip it and everything else still works.
 
 PRIVATE
-Photos are picked with the system picker, and exporting needs add-only access. Only the optional Compress tool asks for library access, to shrink the items you choose. No analytics, no ads, no tracking.
+Photos are picked with the system picker, and exporting needs add-only access. Only Compress asks for library access, to shrink the items you choose. No analytics, no ads, no tracking.
 ```
 
-Keywords (99/100 — "photo" and "editor" are omitted, the name already indexes them):
+Keywords (99/100 — "photo" and "editor" are omitted, the name already indexes them; no "makeup", the app has none):
 
 ```
-beauty,body,face,slim,skin,blemish,makeup,eyes,cutout,background,blur,sticker,portrait,selfie,waist
+beauty,body,face,slim,skin,hair,beard,cutout,background,blur,sticker,portrait,selfie,waist,compress
 ```
 
 App Review Notes:
 
 ```
-No account or login is needed. Tap Open Photo, pick any photo, and every tool in the bottom bar works immediately and offline.
+No account or login is needed. Tap Open Photo and pick any photo. Cutout, Beauty and Reshape work immediately and offline; Hair and AI need the user's own key (below).
 
-Photos access: photos are chosen with the system PHPicker, which needs no permission. Export to Photos asks for add-only access (NSPhotoLibraryAddUsageDescription). The separate Compress tool (Home → ⇲) asks for read/write access (NSPhotoLibraryUsageDescription) only when used: it re-encodes the photos and videos the user picks into smaller copies, and deletes originals only after the user taps Delete and confirms the iOS prompt.
+Photos access: photos to edit are chosen with the system PHPicker, which needs no permission. Export to Photos asks for add-only access (NSPhotoLibraryAddUsageDescription). The separate Compress tool (Home → ⇲) asks for read/write access (NSPhotoLibraryUsageDescription) only when used: it re-encodes the photos and videos the user picks into smaller copies, and deletes originals only after the user taps Delete and confirms the iOS prompt.
 
-Face and body tools (Retouch, Reshape) use Apple's Vision framework on the device to place edits on the user's own photo. Landmarks are never stored or transmitted.
+Face and body tools (Beauty, Reshape) use Apple's Vision framework on the device to place edits on the user's own photo; in a group photo the user taps the one person to edit. Background cutout uses Apple's Vision subject masks; the app bundles no ML models. Landmarks are never stored or transmitted.
 
-Optional AI (the "AI" tool: Magic Erase, Fill, Restyle): requires the reviewer's own API key from OpenAI or Google Gemini, added in Settings → AI Keys. Without a key the AI tool shows an "Add AI Key" button and nothing else changes. With a key, the photo region and prompt are sent directly from the device to that provider. We operate no server.
+Optional AI (the "AI" tool: Magic Erase, Fill, Restyle; and the "Hair" tool: add or thicken hair, bangs, beards, hair colour on a tapped face): requires the reviewer's own API key from OpenAI or Google Gemini, added in Settings → AI Keys. Without a key both tools show an "Add AI Key" button and nothing else changes. With a key, a copy of the photo (at most 1536 px), the masked area and the prompt are sent directly from the device to that provider. We operate no server.
+
+Settings → Demo mode switches to a separate store of sample edits, used for the store screenshots. The user's own edits are untouched, and while it is on, Export and Compress do not write to the Photos library.
 
 All edits are stored locally on the device. We receive no user data.
 ```
@@ -282,7 +284,7 @@ True only while there is no analytics or crash SDK — re-check before each subm
 grep -rniE "analytics|firebase|sentry|amplitude|mixpanel|posthog|bugsnag|crashlytics" PhotoEditor project.yml
 ```
 
-Data leaves the device only when the user taps Erase, Fill or Restyle, and only to the AI
+Data leaves the device only when the user taps Erase, Fill, Restyle or Hair → Apply, and only to the AI
 provider whose key they added — a live request under their own account, not an SDK, and you
 never receive any of it, so none of it is "collected" in Apple's sense. The app's
 `PrivacyInfo.xcprivacy` declares no tracking, no collected data, and the two required-reason
@@ -298,10 +300,15 @@ Skip for 1.0 rather than over-claim.
 |---|---|
 | Base Country or Region | United States (USD) |
 | Price | **Free** ($0.00) |
-| Availability | All countries or regions |
+| Availability | All countries or regions **except China mainland** |
 | Tax Category | App Store software (default) |
 | iPhone and iPad Apps on Apple Silicon Macs | **Off** for 1.0 (untested on Mac) |
 | Apple Vision Pro | Off |
+
+China mainland stays off for 1.0: a China listing needs an ICP filing. `make release STORE=cn`
+stamps `AppStoreRegion = cn` into `Info.plist`; that build offers no AI vendor (`AIVendor.available`),
+so Settings hides AI Keys and the AI and Hair tools say they aren't available in the region.
+The app has no Chinese localization yet, so a `cn` build is still English-only.
 
 ### Not needed for 1.0
 
